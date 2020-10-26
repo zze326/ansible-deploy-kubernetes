@@ -1,0 +1,71 @@
+- name: 检查是否存在 dashboard manifests - manifests/dashboard.yml
+  failed_when: no
+  changed_when: no
+  run_once: yes
+  connection: local
+  shell: 'ls {{ manifests_dir }}/*dashboard*.yml {{ manifests_dir }}/*dashboard*.yaml;'
+  register: check_dashboard_result
+
+- name: 设置变量
+  run_once: yes
+  set_fact:
+    dashboard_manifests_list: '{{ check_dashboard_result.stdout_lines }}'
+
+- block:
+  - name: 分发 dashboard manifests 到 master 节点
+    template:
+      src: '{{ item }}'
+      dest: /tmp/
+    with_items: '{{ dashboard_manifests_list }}'
+
+  - name: 部署 dashboard
+    shell: kubectl apply -f /tmp/{{ item | basename }};
+    with_items: '{{ dashboard_manifests_list }}'
+  
+  - name: 检查 dashboard 证书是否已存在
+    changed_when: no
+    failed_when: no
+    shell: kubectl get secrets kubernetes-dashboard-certs -n kubernetes-dashboard;
+    register: check_dashboard_certs_result
+
+  - name: 使用自签的证书创建 secret 替换 dashboard 原有的 secret
+    shell: |
+      kubectl create secret generic kubernetes-dashboard-certs \
+      --from-file=/opt/apps/kubernetes/ssl/server.pem --from-file=/opt/apps/kubernetes/ssl/server-key.pem -n {{ dashboard_namespace }};
+    when: check_dashboard_certs_result.rc != 0
+
+  - name: 检查 dashboard 管理用户是否存在
+    changed_when: no
+    failed_when: no
+    shell: kubectl get serviceaccount dashboard-admin -n kube-system;
+    register: check_dashboard_admin_result
+
+  - name: 创建 dashboard 管理用户
+    shell: kubectl create serviceaccount dashboard-admin -n kube-system;
+    when: check_dashboard_admin_result.rc != 0
+  
+  - name: 检查 dashboard 管理用户是否已绑定集群角色
+    changed_when: no
+    failed_when: no
+    shell: kubectl get clusterrolebinding dashboard-admin
+    register: check_admin_role_result
+  
+  - name: 为 dashboard 管理用户绑定角色
+    shell: kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin;
+    when: check_admin_role_result.rc != 0
+
+  - name: 获取 dashboard 管理用户的 Token
+    shell: kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | awk '/dashboard-admin/{print $1}') | grep 'token:' | awk '{print $2}';
+    register: dashboard_admin_token_result
+  
+  - name: 打印 token 信息
+    debug: 
+      msg: 'token: {{ dashboard_admin_token_result.stdout }}'
+  
+  - name: 保存 token 到当前 ansible 目录
+    connection: local
+    copy:
+      content: '{{ dashboard_admin_token_result.stdout }}'
+      dest: '{{ dashboard_token_file | realpath }}'
+
+  when: dashboard_manifests_list and ansible_host == master_list[0]

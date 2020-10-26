@@ -15,3 +15,7 @@
 - import_tasks: deploy_flannel.yml
   tags:
   - deploy_flannel
+
+- import_tasks: deploy_dashboard.yml
+  tags:
+  - deploy_dashboard
