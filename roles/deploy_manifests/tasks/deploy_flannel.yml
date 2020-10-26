@@ -11,13 +11,20 @@
   set_fact:
     flannel_manifests_list: '{{ check_flannel_result.stdout_lines }}'
 
-- name: 为 node 节点添加 iptables SNAT 规则
-  iptables:
-    table: nat
-    chain: POSTROUTING
-    action: append
-    source: '{{ ansible_kube_ipvs0.ipv4.address }}/32'
-    jump: MASQUERADE
+- block:
+  - name: 为 node 节点添加 iptables SNAT 规则
+    iptables:
+      table: nat
+      chain: POSTROUTING
+      action: append
+      source: '10.0.0.1/32'
+      jump: MASQUERADE
+
+  - name: 持久化 iptables 规则
+    lineinfile:
+      line: iptables -t nat -A POSTROUTING -s 10.0.0.1/32 -j MASQUERADE
+      dest: /etc/rc.d/rc.local
+      mode: '0755'
   when: node is defined and node
 
 - block:

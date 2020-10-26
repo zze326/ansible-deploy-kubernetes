@@ -19,3 +19,7 @@
 - import_tasks: deploy_dashboard.yml
   tags:
   - deploy_dashboard
+
+- import_tasks: deploy_coredns.yml
+  tags:
+  - deploy_coredns

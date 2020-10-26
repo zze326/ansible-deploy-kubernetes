@@ -1,0 +1,24 @@
+- name: 检查是否存在 coredns manifests - manifests/coredns.yml
+  failed_when: no
+  changed_when: no
+  run_once: yes
+  connection: local
+  shell: 'ls {{ manifests_dir }}/*coredns*.yml {{ manifests_dir }}/*coredns*.yaml'
+  register: check_coredns_result
+
+- name: 设置变量
+  run_once: yes
+  set_fact:
+    coredns_manifests_list: '{{ check_coredns_result.stdout_lines }}'
+
+- block:
+  - name: 分发 coredns manifests 到 master 节点
+    template:
+      src: '{{ item }}'
+      dest: /tmp/
+    with_items: '{{ coredns_manifests_list }}'
+
+  - name: 部署 coredns
+    shell: kubectl apply -f /tmp/{{ item | basename }}
+    with_items: '{{ coredns_manifests_list }}'
+  when: coredns_manifests_list and ansible_host == master_list[0]
