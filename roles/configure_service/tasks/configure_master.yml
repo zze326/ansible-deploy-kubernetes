@@ -1,0 +1,13 @@
+- name: 渲染 Master 配置文件
+  become: yes
+  template:
+    src: '{{ item }}'
+    dest: /opt/apps/kubernetes/conf/
+  with_fileglob: 'templates/master/conf/*'
+
+- name: 渲染 Master 相关 Service unit 文件
+  become: yes
+  template:
+    src: '{{ item }}'
+    dest: /usr/lib/systemd/system/
+  with_fileglob: 'templates/master/systemd/*'

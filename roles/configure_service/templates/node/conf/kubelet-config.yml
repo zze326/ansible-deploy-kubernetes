@@ -1,0 +1,30 @@
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+address: 0.0.0.0
+port: 10250
+readOnlyPort: 10255
+cgroupDriver: cgroupfs
+clusterDNS:
+- 10.0.0.2
+clusterDomain: cluster.local
+failSwapOn: false
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    cacheTTL: 2m0s
+    enabled: true
+  x509:
+    clientCAFile: /opt/apps/kubernetes/ssl/ca.pem 
+authorization:
+  mode: Webhook
+  webhook:
+    cacheAuthorizedTTL: 5m0s
+    cacheUnauthorizedTTL: 30s
+evictionHard:
+  imagefs.available: 15%
+  memory.available: 100Mi
+  nodefs.available: 10%
+  nodefs.inodesFree: 5%
+maxOpenFiles: 1000000
+maxPods: 110

@@ -1,0 +1,2 @@
+cfssl gencert -initca json_file/ca-csr.json | cfssl-json -bare ca -
+cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=json_file/ca-config.json -profile=www json_file/server-csr.json | cfssl-json -bare server

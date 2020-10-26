@@ -1,0 +1,11 @@
+- name: 渲染 ETCD 配置文件
+  become: yes
+  template:
+    src: etcd/conf/etcd.conf
+    dest: /opt/apps/etcd/conf/etcd.conf 
+
+- name: 渲染 ETCD Service unit 文件
+  become: yes
+  template:
+    src: etcd/systemd/etcd.service
+    dest: /usr/lib/systemd/system/etcd.service 

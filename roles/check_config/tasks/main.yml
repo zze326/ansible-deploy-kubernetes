@@ -1,0 +1,92 @@
+- name: 初始化配置 (1/1)
+  fail:
+    msg: 'is_mutil_master 必须定义，为 yes 表示多 master，no 表示单 master'
+  run_once: yes
+  when: not is_mutil_master is defined
+  tags: always
+
+- name: 根据配置文件加载节点信息 (1/1)
+  run_once: yes
+  set_fact: 
+    master_list_str: '{% for host in groups["all"] %}{% if "master" in hostvars[host] and hostvars[host].master %}{{ host }},{% endif %}{% endfor %}'
+    node_list_str: '{% for host in groups["all"] %}{% if "node" in hostvars[host] and hostvars[host].node %}{{ host }},{% endif %}{% endfor %}'
+    etcd_list_str: '{% for host in groups["all"] %}{% if "etcd" in hostvars[host] and hostvars[host].etcd %}{{ host }},{% endif %}{% endfor %}'
+    ha_proxy_list_str: '{% for host in groups["all"] %}{% if "ha_proxy" in hostvars[host] and hostvars[host].ha_proxy %}{{ host }},{% endif %}{% endfor %}'
+  tags: always
+
+- name: 设置变量 (1/1)
+  run_once: yes
+  set_fact:
+    master_list: '{{ master_list_str[0:-1].split(",") }}'
+    node_list: '{{ node_list_str[0:-1].split(",") }}'
+    etcd_list: '{{ etcd_list_str[0:-1].split(",") }}'
+    ha_proxy_list: '{{ ha_proxy_list_str[0:-1].split(",") }}'
+    manifests_dir: '{{ "manifests" | realpath }}'
+  tags: always
+
+- name: 检查 Master 节点 (1/7)
+  fail:
+    msg: '至少需要一个 Master 节点'
+  run_once: yes
+  when: master_list[0] == ""
+  tags: always
+
+- name: 检查 Master 节点 (2/7)
+  fail:
+    msg: 'is_mutil_master: yes 表示多 Master 架构，但只定义了一个 Master 节点'
+  run_once: yes
+  when: is_mutil_master and (master_list | length) <= 1
+  tags: always
+
+- name: 检查 Master (3/7)
+  fail:
+    msg: 'is_mutil_master: yes 表示多 Master 架构，必须通过 virtual_ip 指定一个代理 Master 的 VIP'
+  run_once: yes
+  when: is_mutil_master and not (virtual_ip is defined)
+  tags: always
+
+- name: 检查 Master (4/7)
+  fail:
+    msg: 'is_mutil_master: yes 表示多 Master 架构，必须通过 ha_proxy_port 指定代理 Master 的端口（默认为 7443）'
+  run_once: yes
+  when: is_mutil_master and not (ha_proxy_port is defined)
+  tags: always
+
+- name: 检查 Master (5/7)
+  fail:
+    msg: 'is_mutil_master: yes 表示多 Master 架构，Master 中 api-server 默认监听 6443 端口，ha_proxy_port 必须指定除 6443 以外的端口'
+  run_once: yes
+  when: is_mutil_master and ha_proxy_port == 6443
+  tags: always
+
+- name: 检查 Master (6/7)
+  fail:
+    msg: 'is_mutil_master: yes 表示多 Master 架构，必须在 hosts 中通过 ha_proxy: yes 标识一个以上的代理节点'
+  run_once: yes
+  when: is_mutil_master and ha_proxy_list[0] == ""
+  tags: always
+
+- name: 检查 Master (7/7)
+  fail:
+    msg: 'is_mutil_master: no 表示单 Master 架构，但标识了多个节点为 Master'
+  run_once: yes
+  when: not is_mutil_master and (master_list | length) > 1
+  tags: always
+
+- name: 检查 Node 节点 (1/1)
+  fail:
+    msg: '至少需要一个 Node 节点'
+  run_once: yes
+  when: node_list[0] == ""
+  tags: always
+
+# - name: 
+
+# - name: 检查 manifests - 检查 manifests 目录是否存在
+#   fail:
+#   run_cone: yes
+  
+# - debug:
+#     var: etcd_list
+#   run_once: yes
+#   tags: always

@@ -1,0 +1,17 @@
+- import_tasks: create_dir.yml
+  tags: 
+    - init_dir
+
+- import_tasks: init_centos.yml
+  when: ansible_distribution == 'CentOS'
+  tags:
+    - init_centos
+
+- import_tasks: init_ubuntu.yml
+  when: ansible_distribution == 'Ubuntu'
+  tags:
+    - init_ubuntu
+
+- import_tasks: init_common.yml
+  tags:
+    - init_common

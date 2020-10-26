@@ -1,0 +1,19 @@
+- import_tasks: configure_etcd.yml
+  when: etcd is defined and etcd
+  tags:
+  - configure_etcd
+
+- import_tasks: configure_docker.yml
+  when: (node is defined and node) or (is_mutil_master and ha_proxy is defined and ha_proxy)
+  tags:
+  - configure_docker
+
+- import_tasks: configure_master.yml
+  when: master is defined and master
+  tags:
+  - configure_master
+
+- import_tasks: configure_node.yml
+  when: node is defined and node
+  tags:
+  - configure_node

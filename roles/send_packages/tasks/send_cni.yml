@@ -1,0 +1,6 @@
+- name: 解压 cni 安装包到安装目录
+  become: yes
+  unarchive:
+    src: '{{ item }}'
+    dest: /opt/apps/cni/bin/
+  with_fileglob: '{{ package_dir }}/{{ cni_package_name }}.tgz'

@@ -1,0 +1,43 @@
+{
+    "CN": "kubernetes",
+    "hosts": [
+      "10.0.0.1",
+      "127.0.0.1",
+      "kubernetes",
+      "kubernetes.default",
+      "kubernetes.default.svc",
+      "kubernetes.default.svc.cluster",
+      "kubernetes.default.svc.cluster.local",
+{% if is_mutil_master %}
+{% for host in groups['all'] %}
+    {% if ('master' in hostvars[host] and hostvars[host].master) or ('ha_proxy' in hostvars[host] and hostvars[host].ha_proxy) %}
+    "{{ host }}"{% if not loop.last %},{% endif %}{% if loop.last and api_server_ext_ip_list %},{% endif %}
+
+    {% endif %}
+{% endfor %}
+{% else %}
+{% for host in groups['all'] %}
+    {% if ('master' in hostvars[host] and hostvars[host].master) %}
+    "{{ host }}"{% if not loop.last %},{% endif %}{% if loop.last and api_server_ext_ip_list %},{% endif %}
+
+    {% endif %}
+{% endfor %}
+{% endif %}
+{% for host in api_server_ext_ip_list %}
+    "{{ host }}"{% if not loop.last %},{% endif %}
+{% endfor %}
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "L": "Shenzhen",
+            "ST": "Shenzhen",
+            "O": "k8s",
+            "OU": "System"
+        }
+    ]
+}

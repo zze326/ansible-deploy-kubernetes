@@ -1,0 +1,31 @@
+- hosts: all
+  gather_facts: yes
+  roles:
+    # 检查配置
+    - role: check_config
+      tags:
+      - check_config
+    # 基础环境
+    - role: base_environment
+      tags:
+      - base_environment
+    # 签发证书
+    - role: gen_certs
+      tags:
+      - gen_certs
+    # 分发二进制包
+    - role: send_packages
+      tags:
+      - send_packages
+    # 配置服务
+    - role: configure_service
+      tags:
+      - configure_service
+    # 启动服务
+    - role: start_service
+      tags:
+      - start_service
+    # 部署资源
+    - role: deploy_manifests
+      tags:
+      - deploy_manfests

@@ -1,0 +1,45 @@
+- name: 解压 kubernetes 安装包到本机 /tmp 目录
+  become: yes
+  run_once: yes
+  connection: local
+  unarchive:
+    src: '{{ item }}'
+    dest: /tmp
+  with_fileglob: '{{ package_dir }}/kubernetes-server-*.tar.gz'
+
+- name: 设置临时变量保存 kubernetes 安装包本地解压路径
+  become: yes
+  run_once: yes
+  set_fact:
+    kubernetes_bin_tmp_path: /tmp/{{ kubernetes_package_name }}/server/bin
+
+- block:
+  - name: 分发 master 需要的二进制程序文件
+    become: yes
+    copy:
+      src: '{{ item }}'
+      dest: /opt/apps/kubernetes/bin
+      mode: '0755'
+    with_fileglob: 
+    - '{{ kubernetes_bin_tmp_path }}/kube-apiserver'
+    - '{{ kubernetes_bin_tmp_path }}/kube-controller-manager'
+    - '{{ kubernetes_bin_tmp_path }}/kubectl'
+    - '{{ kubernetes_bin_tmp_path }}/kube-scheduler'
+
+  - name: 将 kubectl 软链接到 PATH 下
+    file:
+      src: /opt/apps/kubernetes/bin/kubectl
+      dest: /usr/local/bin/kubectl
+      state: link
+  when: master is defined and master
+
+- name: 分发 node 需要的二进制程序文件
+  become: yes
+  copy:
+    src: '{{ item }}'
+    dest: /opt/apps/kubernetes/bin
+    mode: '0755'
+  with_fileglob: 
+  - '{{ kubernetes_bin_tmp_path }}/kubelet'
+  - '{{ kubernetes_bin_tmp_path }}/kube-proxy'
+  when: node is defined and node

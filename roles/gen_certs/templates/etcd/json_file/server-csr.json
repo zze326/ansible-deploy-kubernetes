@@ -1,0 +1,19 @@
+{
+    "CN": "etcd",
+    "hosts": [
+{% for host in etcd_list %}
+        "{{ host }}"{% if not loop.last %},{% endif %}
+{% endfor %}
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "L": "Shenzhen",
+            "ST": "Shenzhen"
+        }
+    ]
+}

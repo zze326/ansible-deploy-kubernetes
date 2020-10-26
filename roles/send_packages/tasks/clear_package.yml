@@ -1,0 +1,14 @@
+- name: 获取解压目录路径
+  become: yes
+  ignore_errors: yes
+  changed_when: no
+  failed_when: no
+  shell: ls /tmp/{{ etcd_package_name }} /tmp/{{ kubernetes_package_name }} /tmp/{{ docker_package_name }} -d
+  register: check_package_result
+
+- name: 清理解压目录
+  become: yes
+  file:
+    path: '{{ item }}'
+    state: absent
+  with_items: '{{ check_package_result.stdout_lines }}'

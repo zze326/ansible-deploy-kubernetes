@@ -1,0 +1,16 @@
+- name: 关闭防火墙
+  systemd:
+    name: networking
+    state: stopped
+    enabled: no
+
+- name: 安装 ntpdate
+  apt:
+    name: ntpdate
+  when: have_network
+
+- name: 替换 yum 源为阿里云 - 修改 yum 源 (1/1)
+  copy:
+    src: 'ubuntu{{ ansible_distribution_major_version }}-repo/source.list'
+    dest: /etc/apt/sources.list
+  when: have_network and replace_repo

@@ -1,0 +1,25 @@
+- name: 关闭防火墙
+  systemd:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: 关闭 SELinux
+  selinux:
+    state: disabled
+
+- name: 安装 ntpdate
+  yum:
+    name: ntpdate
+  when: have_network
+
+- block:
+  - name: 替换 yum 源为阿里云 - 清空原有的 yum 源 (1/2)
+    shell: mv /etc/yum.repos.d/* /tmp/
+
+  - name: 替换 yum 源为阿里云 - 添加 yum 源 (2/2)
+    copy:
+      src: '{{ item }}'
+      dest: /etc/yum.repos.d/
+    with_fileglob: centos7-repo/*
+  when: have_network and replace_repo

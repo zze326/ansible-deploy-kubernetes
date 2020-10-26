@@ -1,0 +1,52 @@
+- name: 检查 ETCD 证书是否存在
+  ignore_errors: yes
+  run_once: yes
+  connection: local
+  shell: '[ -f {{ etcd_tls_dir }}/ca.pem ] && [ -f {{ etcd_tls_dir }}/ca-key.pem ] && [ -f {{ etcd_tls_dir }}/server.pem ] && [ -f {{ etcd_tls_dir }}/server.pem ]'
+  changed_when: no
+  failed_when: no
+  register: etcd_exists
+
+- block:
+  - name: 生成 ETCD 证书 - 创建证书存放目录 (1/4)
+    become: yes
+    run_once: yes
+    connection: local
+    file:
+      path: '{{ etcd_tls_dir }}/json_file'
+      state: directory
+
+  - name: 生成 ETCD 证书 - 拷贝 etcd 证书生成 shell (2/4)
+    become: yes
+    run_once: yes
+    connection: local
+    copy:
+      src: templates/etcd/gen_certs.sh
+      dest: '{{ etcd_tls_dir }}'
+      mode: '0755'
+
+  - name: 生成 ETCD 证书 - 渲染 csr 请求文件 (3/4)
+    become: yes
+    run_once: yes
+    connection: local
+    template:
+      src: '{{ item }}'
+      dest: '{{ etcd_tls_dir }}/json_file'
+    with_fileglob: templates/etcd/json_file/*
+
+  - name: 生成 ETCD 证书 - 生成证书 (4/4)
+    become: yes
+    run_once: yes
+    connection: local
+    script: '{{ etcd_tls_dir }}/gen_certs.sh'
+    args:
+      chdir: '{{ etcd_tls_dir }}'  
+  when: etcd_exists.rc != 0
+
+- name: 分发证书到 ETCD 节点
+  become: yes
+  copy:
+    src: '{{ item }}'
+    dest: '/opt/apps/etcd/ssl/'
+  with_fileglob: '{{ etcd_tls_dir }}/*.pem'
+  when: etcd is defined and etcd

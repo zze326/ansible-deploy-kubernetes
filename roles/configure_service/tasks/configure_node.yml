@@ -1,0 +1,13 @@
+- name: 渲染 Node 配置文件
+  become: yes
+  template:
+    src: '{{ item }}'
+    dest: /opt/apps/kubernetes/conf/
+  with_fileglob: 'templates/node/conf/*'
+
+- name: 渲染 Node 相关 Service unit 文件
+  become: yes
+  template:
+    src: '{{ item }}'
+    dest: /usr/lib/systemd/system/
+  with_fileglob: 'templates/node/systemd/*'

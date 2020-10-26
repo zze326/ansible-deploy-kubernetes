@@ -1,0 +1,8 @@
+{
+    "registry-mirrors": ["{% if docker_registry_mirrors is defined %}{{ docker_registry_mirrors }}{% else %}https://7hsct51i.mirror.aliyuncs.com{% endif %}"],
+    "log-driver":"json-file",
+    "log-opts": {"max-size":"500m", "max-file":"3"}{% if docker_insecure_registries is defined and docker_insecure_registries %},{% endif %}
+
+    {% if docker_insecure_registries is defined and docker_insecure_registries %}"insecure-registries": [{% for host in docker_insecure_registries %}"{{ host }}"{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %}
+
+}
