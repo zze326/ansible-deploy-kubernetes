@@ -79,14 +79,3 @@
   run_once: yes
   when: node_list[0] == ""
   tags: always
-
-# - name: 
-
-# - name: 检查 manifests - 检查 manifests 目录是否存在
-#   fail:
-#   run_cone: yes
-  
-# - debug:
-#     var: etcd_list
-#   run_once: yes
-#   tags: always

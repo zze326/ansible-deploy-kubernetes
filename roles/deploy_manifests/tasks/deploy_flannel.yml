@@ -1,0 +1,34 @@
+- name: 检查是否存在 flannel manifests - manifests/kube-flannel.yml
+  failed_when: no
+  changed_when: no
+  run_once: yes
+  connection: local
+  shell: 'ls {{ manifests_dir }}/*flannel*.yml {{ manifests_dir }}/*flannel*.yaml'
+  register: check_flannel_result
+
+- name: 设置变量
+  run_once: yes
+  set_fact:
+    flannel_manifests_list: '{{ check_flannel_result.stdout_lines }}'
+
+- name: 为 node 节点添加 iptables SNAT 规则
+  iptables:
+    table: nat
+    chain: POSTROUTING
+    action: append
+    source: '{{ ansible_kube_ipvs0.ipv4.address }}/32'
+    jump: MASQUERADE
+  when: node is defined and node
+
+- block:
+  - name: 分发 flannel manifests 到 master 节点
+    copy:
+      src: '{{ item }}'
+      dest: /tmp/
+    with_items: '{{ flannel_manifests_list }}'
+
+  - name: 部署 flannel
+    shell: kubectl apply -f /tmp/{{ item | basename }}
+    with_items: '{{ flannel_manifests_list }}'
+  when: flannel_manifests_list and ansible_host == master_list[0]
+

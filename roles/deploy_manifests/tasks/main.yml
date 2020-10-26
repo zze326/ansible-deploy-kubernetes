@@ -1,0 +1,17 @@
+- name: 设置变量
+  set_fact:
+    rbac_filename: kubernetes_user_rbac.yml
+  
+- block:
+  - name: kubernetes 用户授权 - 分发权限 manifests 到 master 节点 (1/2)
+    template:
+      src: '{{ rbac_filename }}'
+      dest: /tmp/
+
+  - name: kubernetes 用户授权 - 执行授权操作 (2/2)
+    shell: kubectl apply -f /tmp/{{ rbac_filename }}
+  when: ansible_host == master_list[0]
+
+- import_tasks: deploy_flannel.yml
+  tags:
+  - deploy_flannel
