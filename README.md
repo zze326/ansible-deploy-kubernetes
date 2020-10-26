@@ -47,13 +47,13 @@ $ sudo ansible-playbook -i hosts.yml run.yml
 > 使用文档后续完善。。暂时有点忙。。`hosts.yml` 中描述也挺详细的，如有疑惑可提 ISSUE 或在 [此链接](https://www.zze.xyz/archives/kubernetes-deploy-binary-mutil-master.html) 下留言。
 
 ## 后续功能
-
-- CNI 插件、Ingress 自动部署；
-- 多 Master 高可用（Keepalived + Nginx）一键部署；
-- 支持 Ubuntu；
-- 支持完全离线部署；
-- 文档完善；
-- CNI 插件可选配置；
-- Ingress-Controller 可选配置；
+- [x] CNI 插件自动部署；
+- [ ] Ingress-Controller 自动部署；
+- [ ] 多 Master 高可用（Keepalived + Nginx）一键部署；
+- [ ] 支持 Ubuntu；
+- [ ] 支持完全离线部署；
+- [ ] 文档完善；
+- [ ] CNI 插件可选配置；
+- [ ] Ingress-Controller 可选配置；
 
 敬请期待。。。
