@@ -10,7 +10,7 @@
       "kubernetes.default.svc.cluster.local",
 {% if is_mutil_master %}
 {% for host in groups['all'] %}
-    {% if ('master' in hostvars[host] and hostvars[host].master) or ('ha_proxy' in hostvars[host] and hostvars[host].ha_proxy) %}
+    {% if ('master' in hostvars[host] and hostvars[host].master) or ('proxy_master' in hostvars[host] and hostvars[host].proxy_master) %}
     "{{ host }}"{% if not loop.last %},{% endif %}{% if loop.last and api_server_ext_ip_list %},{% endif %}
 
     {% endif %}

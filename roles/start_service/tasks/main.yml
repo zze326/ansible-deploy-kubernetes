@@ -13,6 +13,11 @@
   tags:
   - start_master
 
+- import_tasks: start_master_proxy.yml
+  when: is_mutil_master and proxy_master is defined and proxy_master
+  tags:
+  - start_master_proxy
+
 - import_tasks: enable_tls_bootstrapping.yml
   when: ansible_host == master_list[0]
   tags:
@@ -27,8 +32,3 @@
   when: ansible_host == master_list[0]
   tags:
   - certificate_approve
-
-- import_tasks: start_master_proxy.yml
-  when: is_mutil_master and proxy_master is defined and proxy_master
-  tags:
-  - start_master_proxy
