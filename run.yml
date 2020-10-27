@@ -28,4 +28,4 @@
     # 部署资源
     - role: deploy_manifests
       tags:
-      - deploy_manfests
+      - deploy_manifests
