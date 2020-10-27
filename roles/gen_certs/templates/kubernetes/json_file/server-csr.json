@@ -24,8 +24,8 @@
 {% endfor %}
 {% endif %}
 {% for host in api_server_ext_ip_list %}
-    "{{ host }}",
-{% endfor %}, "{{ virtual_ip }}"
+    "{{ host }}"{% if not loop.last %},{% endif %}
+{% endfor %},"{{ virtual_ip }}"
     ],
     "key": {
         "algo": "rsa",
