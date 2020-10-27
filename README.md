@@ -265,7 +265,7 @@ Address 1: 10.0.0.1 kubernetes.default.svc.cluster.local
 解析成功，说明 Core DNS 也工作正常。
 
 ### 检查 Dashboard UI
-这里我将 Dashboard 服务默认使用 `NodePort` 类型的 `Service` 暴露服务，其暴露端口由 `hosts.yml` 中的 `dashboard_port` 指定，这里我指定的为 `30001`，所以 Dashboard UI 的访问地址为 [https:<NodeIP>:30001](https://10.0.1.203:30001)。
+这里我将 Dashboard 服务默认使用 `NodePort` 类型的 `Service` 暴露服务，其暴露端口由 `hosts.yml` 中的 `dashboard_port` 指定，这里我指定的为 `30001`，所以 Dashboard UI 的访问地址为 [https:NodeIP:30001](https://10.0.1.203:30001)。
 
 并且在上述 Ansible Role 执行完成之后会在 `hosts.yml` 同级目录下生成一个 `dashboard_token.txt` 文件，该文件名由 `hosts.yml` 中的 `dashboard_token_file` 指定，该文件中保存了具备访问 Dashboard UI 权限的用户的 Token， 进入 Dashboard UI 页面后直接使用该 Token 就可以登入。
 
