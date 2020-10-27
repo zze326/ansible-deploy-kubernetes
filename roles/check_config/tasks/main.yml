@@ -28,6 +28,7 @@
     cfssl_bin: '/usr/local/bin/cfssl'
     cfssl_certinfo_bin: '/usr/local/bin/cfssl-certinfo'
     cfssl_json_bin: '/usr/local/bin/cfssl-json'
+    dashboard_namespace: kubernetes-dashboard
   tags: always
 
 - name: 检查 Master 节点 (1/7)
