@@ -12,7 +12,7 @@
 - [ ] CNI 插件可选配置；
 - [ ] Ingress-Controller 可选配置；
 
-> > 如有疑惑或建议可提 ISSUE 或在 [此链接](https://www.zze.xyz/archives/kubernetes-deploy-binary-mutil-master.html) 下留言。
+> 如有疑惑或建议可提 ISSUE 或在 [此链接](https://www.zze.xyz/archives/kubernetes-deploy-binary-mutil-master.html) 下留言。
 
 ## 环境准备
 
@@ -167,11 +167,105 @@ all:
 - `10.0.1.201` 和 `10.0.1.202` 作为 Master 的同时也会作为 API Server 的代理节点；
 - `10.0.1.201` 的优先级（`proxy_priority`）比 `10.0.1.202` 高，所以最终 Keepalived 管理的 VIP 会优先绑定到 `10.0.1.201` 上；
 
-## 开始部署
+## 执行部署操作
 按需修改 `hosts.yml`，大部分配置保持默认即可，几乎仅需要修改节点 IP 和密码，修改完成后执行下面命令开始部署操作：
 
 ```bash
 $ sudo ansible-playbook -i hosts.yml run.yml
+...
+TASK [deploy_manifests : 部署 coredns] ****************************************************************************************************************************************************************
+skipping: [10.0.1.202] => (item=/root/kubernetes-deploy-ansible/manifests/coredns.yml) 
+skipping: [10.0.1.203] => (item=/root/kubernetes-deploy-ansible/manifests/coredns.yml) 
+changed: [10.0.1.201] => (item=/root/kubernetes-deploy-ansible/manifests/coredns.yml)
+
+PLAY RECAP ******************************************************************************************************************************************************************************************
+10.0.1.201                 : ok=110  changed=58   unreachable=0    failed=0    skipped=15   rescued=0    ignored=0   
+10.0.1.202                 : ok=68   changed=35   unreachable=0    failed=0    skipped=27   rescued=0    ignored=0   
+10.0.1.203                 : ok=49   changed=24   unreachable=0    failed=0    skipped=46   rescued=0    ignored=0  
 ```
+## 检查
+### 检查 Node
+在 Master 节点（`10.0.1.201` 或 `10.0.1.202`）上检查 Node 是否正常：
+
+```bash
+$ kubectl get node
+NAME          STATUS   ROLES    AGE    VERSION
+k8s-master1   Ready    <none>   113s   v1.19.0
+k8s-master2   Ready    <none>   113s   v1.19.0
+k8s-node1     Ready    <none>   113s   v1.19.0
+```
+### 检查 CNI 网络插件
+检查网络插件是否正常，即检查 `Pod` 能否跨主机通信，创建如下 `Deployment` 资源：
+```bash
+$ cat test_deploy.yml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: test
+  name: test
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+      - image: busybox:1.28.4
+        name: busybox
+        command: ["sleep", "3600"]
+
+$ kubectl apply -f test_deploy.yml
+deployment.apps/test created
+```
+随便进入一个 `Pod` 中的容器，`ping` 另外两个主机上的 `Pod`：
+```bash
+$ kubectl get pod -o wide
+NAME                    READY   STATUS    RESTARTS   AGE   IP           NODE          NOMINATED NODE   READINESS GATES
+test-54fdd84b68-j9zwq   1/1     Running   0          77s   10.244.0.2   k8s-node1     <none>           <none>
+test-54fdd84b68-w64jv   1/1     Running   0          77s   10.244.2.4   k8s-master1   <none>           <none>
+test-54fdd84b68-zptw8   1/1     Running   0          77s   10.244.1.3   k8s-master2   <none>           <none>
+
+$ kubectl exec -it test-54fdd84b68-j9zwq -- sh
+/ # ping 10.244.2.4
+PING 10.244.2.4 (10.244.2.4): 56 data bytes
+64 bytes from 10.244.2.4: seq=0 ttl=62 time=1.334 ms
+^C
+--- 10.244.2.4 ping statistics ---
+1 packets transmitted, 1 packets received, 0% packet loss
+round-trip min/avg/max = 1.334/1.334/1.334 ms
+/ # 
+/ # ping 10.244.1.3
+PING 10.244.1.3 (10.244.1.3): 56 data bytes
+64 bytes from 10.244.1.3: seq=0 ttl=62 time=0.761 ms
+64 bytes from 10.244.1.3: seq=1 ttl=62 time=0.467 ms
+^C
+--- 10.244.1.3 ping statistics ---
+2 packets transmitted, 2 packets received, 0% packet loss
+round-trip min/avg/max = 0.467/0.614/0.761 ms
+```
+可以看到是可以正常通信的。
+
+### 检查 Core DNS
+依旧时进入上述测试进入的 `Pod`，测试解析 `kubernetes` 为 IP：
+
+```bash
+$ kubectl exec -it test-54fdd84b68-j9zwq -- sh
+/ # nslookup kubernetes
+Server:    10.0.0.2
+Address 1: 10.0.0.2 kube-dns.kube-system.svc.cluster.local
+
+Name:      kubernetes
+Address 1: 10.0.0.1 kubernetes.default.svc.cluster.local
+```
+解析成功，说明 Core DNS 也工作正常。
+
+### 检查 Dashboard UI
+这里我将 Dashboard 服务默认使用 `NodePort` 类型的 `Service` 暴露服务，其暴露端口由 `hosts.yml` 中的 `dashboard_port` 指定，这里我指定的为 `30001`，所以 Dashboard UI 的访问地址为 <https://<NodeIP>:30001>。
+并且在上述 Ansible Role 执行完成之后会在 `hosts.yml` 同级目录下生成一个 `dashboard_token.txt` 文件，该文件名由 `hosts.yml` 中的 `dashboard_token_file` 指定，该文件中保存了具备访问 Dashboard UI 权限的用户的 Token， 进入 Dashboard UI 页面后直接使用该 Token 就可以登入。
 
 
