@@ -47,6 +47,16 @@
   become: yes
   copy:
     src: '{{ item }}'
-    dest: '/opt/apps/etcd/ssl/'
+    dest: '{{install_dir}}/etcd/ssl/'
   with_fileglob: '{{ etcd_tls_dir }}/*.pem'
   when: etcd is defined and etcd
+
+- name: 分发证书到 master 节点
+  become: yes
+  copy:
+    src: '{{ item }}'
+    dest: '{{install_dir}}/etcd/ssl/'
+  with_fileglob: 
+  - '{{ etcd_tls_dir }}/server*.pem'
+  - '{{ etcd_tls_dir }}/ca.pem'
+  when: master is defined and master

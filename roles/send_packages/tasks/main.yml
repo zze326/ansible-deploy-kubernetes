@@ -21,7 +21,7 @@
   - send_kubernetes
 
 - import_tasks: send_docker.yml
-  when: (node is defined and node) or (is_mutil_master and ha_proxy is defined and ha_proxy)
+  when: (node is defined and node) or (is_mutil_master and proxy_master is defined and proxy_master)
   tags:
   - send_docker
 

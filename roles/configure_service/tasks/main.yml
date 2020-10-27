@@ -4,7 +4,7 @@
   - configure_etcd
 
 - import_tasks: configure_docker.yml
-  when: (node is defined and node) or (is_mutil_master and ha_proxy is defined and ha_proxy)
+  when: (node is defined and node) or (is_mutil_master and proxy_master is defined and proxy_master)
   tags:
   - configure_docker
 
@@ -17,3 +17,8 @@
   when: node is defined and node
   tags:
   - configure_node
+
+- import_tasks: configure_ha_master.yml
+  when: is_mutil_master and proxy_master is defined and proxy_master
+  tags:
+  - configure_ha_master

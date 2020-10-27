@@ -1,97 +1,34 @@
-- name: 启动 ETCD 服务
-  become: yes
-  systemd:
-    name: etcd
-    state: started
-    enabled: yes
-    daemon_reload: yes
+- import_tasks: start_etcd.yml
   when: etcd is defined and etcd
   tags:
   - start_etcd
 
-- name: 启动 Docker 服务
-  become: yes
-  systemd:
-    name: docker
-    state: started
-    enabled: yes
-    daemon_reload: yes
-  when: (node is defined and node) or (is_mutil_master and ha_proxy is defined and ha_proxy)
+- import_tasks: start_docker.yml
+  when: (node is defined and node) or (is_mutil_master and proxy_master is defined and proxy_master)
   tags:
   - start_docker
 
-- name: 启动 Master 相关服务
-  become: yes
-  systemd:
-    name: '{{ item }}'
-    state: started
-    enabled: yes
-    daemon_reload: yes
+- import_tasks: start_master.yml
   when: master is defined and master
-  with_items:
-  - kube-apiserver
-  - kube-controller-manager
-  - kube-scheduler
   tags:
   - start_master
 
-- block:
-  - name: 启用 TLS Bootstrapping - 检查 kubelet-bootstrap 是否已绑定角色 (1/2)
-    become: yes
-    failed_when: no
-    changed_when: no
-    shell: |
-      until curl -s -I 127.0.0.1:8080 &> /dev/null;do
-        sleep 5;
-      done
-      kubectl get clusterrolebinding | awk '{print $1}' | grep kubelet-bootstrap
-    tags:
-    - enable_tls_bootstrapping
-    register: check_bootstrapping_result
-
-  - name: 启用 TLS Bootstrapping - 绑定 kubelet-bootstrap 到集群角色 system:node-bootstrapper (2/2)
-    become: yes
-    shell: |
-      until kubectl create clusterrolebinding kubelet-bootstrap \
-        --clusterrole=system:node-bootstrapper \
-        --user=kubelet-bootstrap; do
-        sleep 5;
-      done
-    tags:
-    - enable_tls_bootstrapping
-    when: check_bootstrapping_result.rc != 0 
+- import_tasks: enable_tls_bootstrapping.yml
   when: ansible_host == master_list[0]
+  tags:
+  - enable_tls_bootstrapping
 
-- name: 启动 Node 相关服务
-  become: yes
-  systemd:
-    name: '{{ item }}'
-    state: started
-    enabled: yes
-    daemon_reload: yes
+- import_tasks: start_node.yml
   when: node is defined and node
-  with_items:
-  - kubelet
-  - kube-proxy
   tags:
   - start_node
 
-- name: 签发 Kubelet 申请的证书 - 阻塞直到证书申请 Token 个数与 Node 节点个数相同 (1/2)
-  become: yes
-  shell: |
-    until [ `kubectl get csr | awk 'NR>1{print $1}' | wc -l` -eq {{ node_list | length }} ];do
-      sleep 5;
-    done
+- import_tasks: certificate_approve.yml
   when: ansible_host == master_list[0]
   tags:
   - certificate_approve
 
-- name: 签发 Kubelet 申请的证书 - 签发证书 (2/2)
-  become: yes
-  shell: |
-    until kubectl get csr | awk 'NR>1{print $1}' | xargs -i kubectl certificate approve {};do
-      sleep 5;
-    done
-  when: ansible_host == master_list[0]
+- import_tasks: start_master_proxy.yml
+  when: is_mutil_master and proxy_master is defined and proxy_master
   tags:
-  - certificate_approve
+  - start_master_proxy

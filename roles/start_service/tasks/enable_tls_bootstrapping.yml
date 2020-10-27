@@ -1,0 +1,20 @@
+- name: 启用 TLS Bootstrapping - 检查 kubelet-bootstrap 是否已绑定角色 (1/2)
+  become: yes
+  failed_when: no
+  changed_when: no
+  shell: |
+    until curl -s -I 127.0.0.1:8080 &> /dev/null;do
+      sleep 5;
+    done
+    kubectl get clusterrolebinding | awk '{print $1}' | grep kubelet-bootstrap
+  register: check_bootstrapping_result
+
+- name: 启用 TLS Bootstrapping - 绑定 kubelet-bootstrap 到集群角色 system:node-bootstrapper (2/2)
+  become: yes
+  shell: |
+    until kubectl create clusterrolebinding kubelet-bootstrap \
+      --clusterrole=system:node-bootstrapper \
+      --user=kubelet-bootstrap; do
+      sleep 5;
+    done
+  when: check_bootstrapping_result.rc != 0

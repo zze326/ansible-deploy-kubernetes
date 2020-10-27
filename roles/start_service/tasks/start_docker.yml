@@ -1,0 +1,7 @@
+- name: 启动 Docker 服务
+  become: yes
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+    daemon_reload: yes

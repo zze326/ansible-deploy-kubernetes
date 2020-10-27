@@ -7,6 +7,11 @@
     - ['bin', 'conf', 'ssl', 'log']
   when: (master is defined and master) or (node is defined and node)
 
+- name: 在 master 节点创建 ETCD 证书目录
+  file:
+    path: '{{install_dir}}/etcd/ssl'
+    state: directory
+
 - name: 创建 ETCD 程序目录
   file:
     path: '{{ item.0 }}/{{ item.1 }}'
@@ -23,7 +28,7 @@
   with_nested:
     - ['{{install_dir}}/docker']
     - ['bin', 'data', 'conf']
-  when: (node is defined and node) or (ha_proxy is defined and ha_proxy)
+  when: (node is defined and node) or (proxy_master is defined and proxy_master)
 
 - name: 创建 CNI 插件安装目录
   file:
@@ -41,7 +46,7 @@
   with_nested:
     - ['{{install_dir}}/nginx']
     - ['conf/conf.d', 'log']
-  when: ha_proxy is defined and ha_proxy
+  when: proxy_master is defined and proxy_master
 
 - name: 创建 Keepalived 程序目录
   file:
@@ -50,4 +55,4 @@
   with_nested:
     - ['{{install_dir}}/keepalived']
     - ['conf']
-  when: ha_proxy is defined and ha_proxy
+  when: proxy_master is defined and proxy_master

@@ -1,0 +1,11 @@
+- name: 启动 Master 相关服务
+  become: yes
+  systemd:
+    name: '{{ item }}'
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  with_items:
+  - kube-apiserver
+  - kube-controller-manager
+  - kube-scheduler

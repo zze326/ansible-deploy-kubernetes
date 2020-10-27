@@ -1,0 +1,62 @@
+- name: 设置变量
+  set_fact:
+    nginx_container_name: nginx-proxy
+    keepalived_container_name: keepalived
+
+- name: 检查 Nginx 容器是否已经启动
+  failed_when: no
+  changed_when: no
+  shell: docker ps | awk 'NR>1{print $NF}' | grep {{ nginx_container_name }}
+  register: check_nginx_running_result
+
+- name: 检查是否已存在 Nginx 容器
+  failed_when: no
+  changed_when: no
+  shell: docker ps -a | awk 'NR>1{print $NF}' | grep {{ nginx_container_name }}
+  register: check_nginx_container_result
+
+- block:
+  - name: 如果存在 Nginx 容器，则删除已有的 Nginx 容器
+    shell: docker rm -f {{ nginx_container_name }}
+    when: check_nginx_container_result.rc == 0
+
+  - name: 运行一个 Nginx 容器
+    shell: |
+      docker run -d -v {{ install_dir }}/nginx/conf/conf.d:/etc/nginx/conf.d \
+      --restart=always \
+      -v {{ install_dir }}/nginx/conf/nginx.conf:/etc/nginx/nginx.conf \
+      -v {{ install_dir }}/nginx/log:/var/log/nginx \
+      --net=host \
+      --name {{ nginx_container_name }} nginx:latest
+  when: check_nginx_running_result.rc != 0
+
+- name: 检查 Keepalived 容器是否已经启动
+  failed_when: no
+  changed_when: no
+  shell: docker ps | awk 'NR>1{print $NF}' | grep {{ keepalived_container_name }}
+  register: check_keepalived_running_result
+
+- name: 检查是否已存在 Keepalived 容器
+  failed_when: no
+  changed_when: no
+  shell: docker ps -a | awk 'NR>1{print $NF}' | grep {{ keepalived_container_name }}
+  register: check_keepalived_container_result
+
+
+- block:
+  - name: 如果存在 Keepalived 容器，则删除已有的 Keepalived 容器
+    shell: docker rm -f {{ keepalived_container_name }}
+    when: check_keepalived_container_result.rc == 0
+
+  - name: 运行一个 Keepalived 容器
+    shell: |
+      docker run -d \
+        --restart=always \
+        --net host \
+        -it \
+        -v {{ install_dir }}/keepalived/conf/keepalived.conf:/etc/keepalived/keepalived.conf \
+        --name {{ keepalived_container_name }} \
+        --cap-add NET_ADMIN \
+        arcts/keepalived \
+        keepalived -n -l -f /etc/keepalived/keepalived.conf
+  when: check_keepalived_running_result.rc != 0

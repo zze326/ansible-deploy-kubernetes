@@ -11,7 +11,8 @@
     master_list_str: '{% for host in groups["all"] %}{% if "master" in hostvars[host] and hostvars[host].master %}{{ host }},{% endif %}{% endfor %}'
     node_list_str: '{% for host in groups["all"] %}{% if "node" in hostvars[host] and hostvars[host].node %}{{ host }},{% endif %}{% endfor %}'
     etcd_list_str: '{% for host in groups["all"] %}{% if "etcd" in hostvars[host] and hostvars[host].etcd %}{{ host }},{% endif %}{% endfor %}'
-    ha_proxy_list_str: '{% for host in groups["all"] %}{% if "ha_proxy" in hostvars[host] and hostvars[host].ha_proxy %}{{ host }},{% endif %}{% endfor %}'
+    proxy_master_list_str: '{% for host in groups["all"] %}{% if "proxy_master" in hostvars[host] and hostvars[host].proxy_master %}{{ host }},{% endif %}{% endfor %}'
+    max_proxy_priority: '{% set max = 0 %}{% for host in groups["all"] %}{% if "proxy_priority" in hostvars[host] %}{% if hostvars[host].proxy_priority > max %}{% set max = hostvars[host].proxy_priority%}{% if loop.last %}{{ max }}{% endif %}{% endif %}{% endif %}{% endfor %}'
   tags: always
 
 - name: 设置变量 (1/1)
@@ -20,7 +21,7 @@
     master_list: '{{ master_list_str[0:-1].split(",") }}'
     node_list: '{{ node_list_str[0:-1].split(",") }}'
     etcd_list: '{{ etcd_list_str[0:-1].split(",") }}'
-    ha_proxy_list: '{{ ha_proxy_list_str[0:-1].split(",") }}'
+    proxy_master_list: '{{ proxy_master_list_str[0:-1].split(",") }}'
     manifests_dir: '{{ "manifests" | realpath }}'
   tags: always
 
@@ -47,23 +48,23 @@
 
 - name: 检查 Master (4/7)
   fail:
-    msg: 'is_mutil_master: yes 表示多 Master 架构，必须通过 ha_proxy_port 指定代理 Master 的端口（默认为 7443）'
+    msg: 'is_mutil_master: yes 表示多 Master 架构，必须通过 proxy_master_port 指定代理 Master 的端口（默认为 7443）'
   run_once: yes
-  when: is_mutil_master and not (ha_proxy_port is defined)
+  when: is_mutil_master and not (proxy_master_port is defined)
   tags: always
 
 - name: 检查 Master (5/7)
   fail:
-    msg: 'is_mutil_master: yes 表示多 Master 架构，Master 中 api-server 默认监听 6443 端口，ha_proxy_port 必须指定除 6443 以外的端口'
+    msg: 'is_mutil_master: yes 表示多 Master 架构，Master 中 api-server 默认监听 6443 端口，proxy_master_port 必须指定除 6443 以外的端口'
   run_once: yes
-  when: is_mutil_master and ha_proxy_port == 6443
+  when: is_mutil_master and proxy_master_port == 6443
   tags: always
 
 - name: 检查 Master (6/7)
   fail:
-    msg: 'is_mutil_master: yes 表示多 Master 架构，必须在 hosts 中通过 ha_proxy: yes 标识一个以上的代理节点'
+    msg: 'is_mutil_master: yes 表示多 Master 架构，必须在 hosts 中通过 proxy_master: yes 标识一个以上的代理节点'
   run_once: yes
-  when: is_mutil_master and ha_proxy_list[0] == ""
+  when: is_mutil_master and proxy_master_list[0] == ""
   tags: always
 
 - name: 检查 Master (7/7)
