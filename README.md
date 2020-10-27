@@ -51,7 +51,7 @@ $ sudo ansible-playbook -i hosts.yml run.yml
 - [x] Dashboard UI 自动部署；
 - [x] core DNS 自动部署；
 - [ ] Ingress-Controller 自动部署；
-- [ ] 多 Master 高可用（Keepalived + Nginx）一键部署；
+- [x] 多 Master 高可用（Keepalived + Nginx）一键部署；
 - [ ] 支持 Ubuntu；
 - [ ] 支持完全离线部署；
 - [ ] 文档完善；
