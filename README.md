@@ -131,8 +131,6 @@ all:
     pause_image: registry.cn-shenzhen.aliyuncs.com/zze/pause:3.2
     # Dashboard Web UI 使用的端口 30000-32767 之间
     dashboard_port: 30001
-    # Dashboard 部署到的命名空间
-    dashboard_namespace: kube-system
     # 保存 Dashboard 访问 Token 的文件名，在当前 hosts.yml 同级目录下
     dashboard_token_file: dashboard_token.txt
   # 下面为主机清单配置，只不过是 YAML 格式，每一个 IP 代表一个主机，其下级字段为对应的主机变量，即如下配置有三个主机
