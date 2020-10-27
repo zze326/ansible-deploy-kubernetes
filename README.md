@@ -50,6 +50,7 @@ $ sudo ansible-playbook -i hosts.yml run.yml
 - [x] CNI 插件自动部署；
 - [x] Dashboard UI 自动部署；
 - [x] core DNS 自动部署；
+- [ ] 一键加入新的 Node；
 - [ ] Ingress-Controller 自动部署；
 - [x] 多 Master 高可用（Keepalived + Nginx）一键部署；
 - [ ] 支持 Ubuntu；
