@@ -17,11 +17,11 @@
       path: '{{ kubernetes_tls_dir }}/json_file'
       state: directory
 
-  - name: 生成 kubernetes 证书 - 拷贝 kubernetes 证书生成 shell (2/4)
+  - name: 生成 kubernetes 证书 - 渲染 kubernetes 证书生成 shell (2/4)
     become: yes
     run_once: yes
     connection: local
-    copy:
+    template:
       src: templates/kubernetes/gen_certs.sh
       dest: '{{ kubernetes_tls_dir }}'
       mode: '0755'
@@ -48,7 +48,7 @@
   become: yes
   copy:
     src: '{{ item }}'
-    dest: '/opt/apps/kubernetes/ssl/'
+    dest: '{{ install_dir }}/kubernetes/ssl/'
   with_fileglob: 
   - '{{ kubernetes_tls_dir }}/ca*.pem'
   - '{{ kubernetes_tls_dir }}/server*.pem'
@@ -58,7 +58,7 @@
   become: yes
   copy:
     src: '{{ item }}'
-    dest: '/opt/apps/kubernetes/ssl/'
+    dest: '{{ install_dir }}/kubernetes/ssl/'
   with_fileglob: 
   - '{{ kubernetes_tls_dir }}/ca.pem'
   - '{{ kubernetes_tls_dir }}/kube-proxy*.pem'

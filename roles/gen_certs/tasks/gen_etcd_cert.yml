@@ -16,11 +16,11 @@
       path: '{{ etcd_tls_dir }}/json_file'
       state: directory
 
-  - name: 生成 ETCD 证书 - 拷贝 etcd 证书生成 shell (2/4)
+  - name: 生成 ETCD 证书 - 渲染 etcd 证书生成 shell (2/4)
     become: yes
     run_once: yes
     connection: local
-    copy:
+    template:
       src: templates/etcd/gen_certs.sh
       dest: '{{ etcd_tls_dir }}'
       mode: '0755'

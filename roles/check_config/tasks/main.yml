@@ -23,6 +23,11 @@
     etcd_list: '{{ etcd_list_str[0:-1].split(",") }}'
     proxy_master_list: '{{ proxy_master_list_str[0:-1].split(",") }}'
     manifests_dir: '{{ "manifests" | realpath }}'
+    etcd_tls_dir: '{{ tls_dir }}/etcd'
+    kubernetes_tls_dir: '{{ tls_dir }}/kubernetes'
+    cfssl_bin: '/usr/local/bin/cfssl'
+    cfssl_certinfo_bin: '/usr/local/bin/cfssl-certinfo'
+    cfssl_json_bin: '/usr/local/bin/cfssl-json'
   tags: always
 
 - name: 检查 Master 节点 (1/7)

@@ -7,13 +7,9 @@
     dest: '{{ item.dest }}'
     mode: '0755'
   with_items:
-  - {'src': 'cfssl_linux-amd64', 'dest': '/usr/local/bin/cfssl'}
-  - {'src': 'cfssl-certinfo_linux-amd64', 'dest': '/usr/local/bin/cfssl-certinfo'}
-  - {'src': 'cfssljson_linux-amd64', 'dest': '/usr/local/bin/cfssl-json'}
-
-- set_fact:
-    etcd_tls_dir: '{{ tls_dir }}/etcd'
-    kubernetes_tls_dir: '{{ tls_dir }}/kubernetes'
+  - {'src': 'cfssl_linux-amd64', 'dest': '{{ cfssl_bin }}'}
+  - {'src': 'cfssl-certinfo_linux-amd64', 'dest': '{{ cfssl_certinfo_bin }}'}
+  - {'src': 'cfssljson_linux-amd64', 'dest': '{{ cfssl_json_bin }}'}
 
 - import_tasks: gen_etcd_cert.yml
   tags:

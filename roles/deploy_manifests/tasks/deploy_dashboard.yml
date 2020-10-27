@@ -25,7 +25,7 @@
   - name: 检查 dashboard 证书是否已存在
     changed_when: no
     failed_when: no
-    shell: kubectl get secrets kubernetes-dashboard-certs -n kubernetes-dashboard;
+    shell: kubectl get secrets kubernetes-dashboard-certs -n {{ dashboard_namespace }};
     register: check_dashboard_certs_result
 
   - name: 使用自签的证书创建 secret 替换 dashboard 原有的 secret

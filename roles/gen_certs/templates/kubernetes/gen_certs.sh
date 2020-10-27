@@ -1,4 +1,4 @@
-cfssl gencert -initca json_file/ca-csr.json | cfssl-json -bare ca -
-cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=json_file/ca-config.json -profile=kubernetes json_file/server-csr.json | cfssl-json -bare server
-cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=json_file/ca-config.json -profile=kubernetes json_file/admin-csr.json | cfssl-json -bare admin
-cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=json_file/ca-config.json -profile=kubernetes json_file/kube-proxy-csr.json | cfssl-json -bare kube-proxy
+{{ cfssl_bin }} gencert -initca json_file/ca-csr.json | {{ cfssl_json_bin }} -bare ca -
+{{ cfssl_bin }} gencert -ca=ca.pem -ca-key=ca-key.pem -config=json_file/ca-config.json -profile=kubernetes json_file/server-csr.json | {{ cfssl_json_bin }} -bare server
+{{ cfssl_bin }} gencert -ca=ca.pem -ca-key=ca-key.pem -config=json_file/ca-config.json -profile=kubernetes json_file/admin-csr.json | {{ cfssl_json_bin }} -bare admin
+{{ cfssl_bin }} gencert -ca=ca.pem -ca-key=ca-key.pem -config=json_file/ca-config.json -profile=kubernetes json_file/kube-proxy-csr.json | {{ cfssl_json_bin }} -bare kube-proxy
