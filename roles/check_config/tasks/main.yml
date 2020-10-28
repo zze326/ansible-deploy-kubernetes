@@ -3,7 +3,6 @@
     msg: 'is_mutil_master 必须定义，为 yes 表示多 master，no 表示单 master'
   run_once: yes
   when: not is_mutil_master is defined
-  tags: always
 
 - name: 根据配置文件加载节点信息 (1/1)
   run_once: yes
@@ -13,7 +12,6 @@
     etcd_list_str: '{% for host in groups["all"] %}{% if "etcd" in hostvars[host] and hostvars[host].etcd %}{{ host }},{% endif %}{% endfor %}'
     proxy_master_list_str: '{% for host in groups["all"] %}{% if "proxy_master" in hostvars[host] and hostvars[host].proxy_master %}{{ host }},{% endif %}{% endfor %}'
     max_proxy_priority: '{% set max = 0 %}{% for host in groups["all"] %}{% if "proxy_priority" in hostvars[host] %}{% if hostvars[host].proxy_priority > max %}{% set max = hostvars[host].proxy_priority%}{% if loop.last %}{{ max }}{% endif %}{% endif %}{% endif %}{% endfor %}'
-  tags: always
 
 - name: 设置变量 (1/1)
   run_once: yes
@@ -29,67 +27,57 @@
     cfssl_certinfo_bin: '/usr/local/bin/cfssl-certinfo'
     cfssl_json_bin: '/usr/local/bin/cfssl-json'
     dashboard_namespace: kubernetes-dashboard
-  tags: always
 
-- name: 检查 Master 节点 (1/7)
+- name: 检查 Master 节点 (1/8)
   fail:
     msg: '至少需要一个 Master 节点'
   run_once: yes
   when: master_list[0] == ""
-  tags: always
 
-- name: 检查 Master 节点 (2/7)
+- name: 检查 Master 节点 (2/8)
   fail:
     msg: 'is_mutil_master: yes 表示多 Master 架构，但只定义了一个 Master 节点'
   run_once: yes
   when: is_mutil_master and (master_list | length) <= 1
-  tags: always
 
-- name: 检查 Master (3/7)
+- name: 检查 Master (3/8)
   fail:
     msg: 'is_mutil_master: yes 表示多 Master 架构，必须通过 virtual_ip 指定一个代理 Master 的 VIP'
   run_once: yes
   when: is_mutil_master and not (virtual_ip is defined)
-  tags: always
 
-- name: 检查 Master (4/7)
+- name: 检查 Master (4/8)
   fail:
     msg: 'is_mutil_master: yes 表示多 Master 架构，必须通过 proxy_master_port 指定代理 Master 的端口（默认为 7443）'
   run_once: yes
   when: is_mutil_master and not (proxy_master_port is defined)
-  tags: always
 
-- name: 检查 Master (5/7)
+- name: 检查 Master (5/8)
   fail:
     msg: 'is_mutil_master: yes 表示多 Master 架构，Master 中 api-server 默认监听 6443 端口，proxy_master_port 必须指定除 6443 以外的端口'
   run_once: yes
   when: is_mutil_master and proxy_master_port == 6443
-  tags: always
 
-- name: 检查 Master (6/7)
+- name: 检查 Master (6/8)
   fail:
     msg: 'is_mutil_master: yes 表示多 Master 架构，必须在 hosts 中通过 proxy_master: yes 标识一个以上的代理节点'
   run_once: yes
   when: is_mutil_master and proxy_master_list[0] == ""
-  tags: always
 
-- name: 检查 Master (7/7)
+- name: 检查 Master (7/8)
   fail:
     msg: 'is_mutil_master: no 表示单 Master 架构，但标识了多个节点为 Master'
   run_once: yes
   when: not is_mutil_master and (master_list | length) > 1
-  tags: always
 
-- name: 检查 Master
+- name: 检查 Master (8/8)
   fail:
     msg: '{{ item }} 使用 proxy_master: yes 标识了它为 api-server 代理节点，但是没有使用 proxy_priority 来指定 VIP 的权重'
   when: ansible_host == item and not proxy_priority is defined
   with_items: '{{ proxy_master_list }}'
-  tags: always
 
 - name: 检查 Node 节点 (1/1)
   fail:
     msg: '至少需要一个 Node 节点'
   run_once: yes
   when: node_list[0] == ""
-  tags: always

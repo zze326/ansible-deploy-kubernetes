@@ -4,6 +4,7 @@
     # 检查配置
     - role: check_config
       tags:
+      - always
       - check_config
     # 基础环境
     - role: base_environment
