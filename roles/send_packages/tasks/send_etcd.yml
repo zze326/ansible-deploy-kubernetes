@@ -17,7 +17,7 @@
     register: etcd_package_dir_result
 
   - name: 移动可执行文件到 /opt/apps/etcd/bin
-    shell: mv {{ etcd_package_dir_result.stdout_lines[0] }}/{{ item s}} /opt/apps/etcd/bin
+    shell: mv {{ etcd_package_dir_result.stdout_lines[0] }}/{{ item }} /opt/apps/etcd/bin
     with_items:
     - etcd
     - etcdctl

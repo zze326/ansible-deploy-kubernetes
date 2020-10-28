@@ -35,13 +35,3 @@
     path: /etc/fstab
     regexp: '^([^#].*\sswap\s+\s+.*)$'
     replace: '# \1'
-
-- name: 加载 IPVS 模块 - 修改 /etc/rc.local (1/2)
-  lineinfile:
-    line: 'for i in $(ls /usr/lib/modules/$(uname -r)/kernel/net/netfilter/ipvs|grep -o "^[^.]*");do /sbin/modinfo -F filename $i >/dev/null 2>&1 && /sbin/modprobe $i;done' 
-    path: /etc/rc.d/rc.local
-    mode: '0755'
-
-- name: 加载 IPVS 模块 - 立即加载 (2/2)
-  changed_when: no
-  shell: source /etc/rc.local

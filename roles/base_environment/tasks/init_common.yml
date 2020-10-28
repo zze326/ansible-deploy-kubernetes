@@ -38,6 +38,16 @@
     - 'root            hard    nofile          65535'
     - 'root            soft    nofile          65535'
 
+- name: 加载 IPVS 模块 - 修改 /etc/rc.local (1/2)
+  lineinfile:
+    line: 'for i in $(ls /usr/lib/modules/$(uname -r)/kernel/net/netfilter/ipvs|grep -o "^[^.]*");do /sbin/modinfo -F filename $i >/dev/null 2>&1 && /sbin/modprobe $i;done' 
+    path: /etc{% if ansible_distribution == "CentOS" %}/rc.d{% endif %}/rc.local
+    mode: '0755'
+
+- name: 加载 IPVS 模块 - 立即加载 (2/2)
+  changed_when: no
+  shell: . /etc/rc.local
+
 - name: 时间同步
   cron:
     name: sync network time
