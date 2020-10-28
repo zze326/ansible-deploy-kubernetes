@@ -5,7 +5,7 @@
 - [x] Dashboard UI 自动部署；
 - [x] core DNS 自动部署；
 - [x] 一键加入新的 Node；
-- [ ] Ingress-Controller 自动部署；
+- [x] Ingress-Controller 自动部署；
 - [x] 多 Master 高可用（Keepalived + Nginx）一键部署；
 - [ ] 支持 Ubuntu；
 - [ ] 支持完全离线部署；
@@ -17,6 +17,7 @@
 ## 环境准备
 
 ### 离线二进制包下载
+
 链接: <https://pan.baidu.com/s/1GePd1S3W6hw-ToHerTCokg>  密码: `dovo`.
 
 其中包含的二进制包如下：
@@ -134,6 +135,8 @@ all:
     dashboard_port: 30001
     # 保存 Dashboard 访问 Token 的文件名，在当前 hosts.yml 同级目录下
     dashboard_token_file: dashboard_token.txt
+    # 启用 Ingress，可使用在 hosts 节对应主机下添加 ingress: yes 标识仅在该主机上部署 Ingress-Controller，如果没有标识则默认在所有 Node 上部署
+    enable_ingress: yes
   # 下面为主机清单配置，只不过是 YAML 格式，每一个 IP 代表一个主机，其下级字段为对应的主机变量，即如下配置有三个主机
   hosts:
     10.0.1.201:
@@ -160,6 +163,7 @@ all:
       hostname: k8s-node1
       etcd: yes
       node: yes
+      ingress: yes
 ```
 从上述配置可以看出：
 - 上述配置最终会创建一个三节点的双 Master 三 Node 的 Kubernete 集群，并且每个节点也是 ETCD 集群中的一个成员；
@@ -210,6 +214,7 @@ all:
       hostname: k8s-node1
       etcd: yes
       node: yes
+      ingress: yes
 ```
 
 修改完成后执行下面命令开始部署操作：
@@ -228,6 +233,64 @@ PLAY RECAP *********************************************************************
 10.0.1.203                 : ok=49   changed=24   unreachable=0    failed=0    skipped=46   rescued=0    ignored=0  
 ```
 目前 Ansible 的最后一个 Task 是 `部署  coredns`，到这里说明你的 Ansible 顺利执行完成了。
+## 添加 Node 节点
+
+要添加 Node 节点也很简单，仅需在 `hosts.yml` 下新添加一个节点，并添加一个主机变量 `node: yes` 标识它为 Node 节点，我这里要添加一个 `10.0.1.204` 的主机为新 Node，所以在 `hosts.yml` 中添加配置如下：
+
+```yml
+all:
+  vars:
+    ansible_user: root
+    ansible_ssh_pass: root1234
+    ansible_sudo_pass: root1234
+    ...
+  hosts:
+    ...
+    10.0.1.203: 
+      hostname: k8s-node1
+      etcd: yes
+      node: yes
+    10.0.1.204:
+      hostname: k8s-node2
+      node: yes
+```
+
+然后执行 Playbook 时限定仅执行新 Node 节点相关的 Task，如下：
+
+```bash
+$ sudo ansible-playbook -i hosts.yml run.yml --limit 10.0.1.204
+```
+
+> 如果需要同时添加多个 Node 节点，有如下两种方法：
+>
+> 1. 使用 `--limit` 时后面指定多个 Node IP，以逗号 `,` 分隔；
+> 2. 可以将多个 Node 节点的 IP 保存到一个文本文件，每行一个 IP，然后执行 `ansible-playbook` 时使用 `--limit @<文件名>` 即可；
+
+执行完成后在 Master 节点可以接收到新 Node 中的 Kubulet 发出的证书申请：
+
+```bash
+$ kubectl get csr | grep Pending
+node-csr-jHEi1_yP3TNX80M8_4KPRxIziC7E-bkf07rJpa_l4Vw   2m16s   kubernetes.io/kube-apiserver-client-kubelet   kubelet-bootstrap   Pending
+```
+
+直接在 Master 节点执行下面命令允许签发证书即可：
+
+```bash
+$ kubectl get csr | awk '$NF=="Pending"{print $1}' | xargs -i kubectl certificate approve {}
+certificatesigningrequest.certificates.k8s.io/node-csr-jHEi1_yP3TNX80M8_4KPRxIziC7E-bkf07rJpa_l4Vw approved
+```
+
+然后就可以查看到新加入的节点了：
+
+```bash
+$ kubectl get node
+NAME          STATUS     ROLES    AGE   VERSION
+k8s-master1   Ready      <none>   26m   v1.19.0
+k8s-master2   Ready      <none>   21m   v1.19.0
+k8s-node1     Ready      <none>   26m   v1.19.0
+k8s-node2     NotReady   <none>   22s   v1.19.0
+```
+
 
 ## 检查
 
@@ -313,6 +376,7 @@ Address 1: 10.0.0.1 kubernetes.default.svc.cluster.local
 解析成功，说明 Core DNS 也工作正常。
 
 ### 检查 Dashboard UI
+
 这里我将 Dashboard 服务默认使用 `NodePort` 类型的 `Service` 暴露服务，其暴露端口由 `hosts.yml` 中的 `dashboard_port` 指定，这里我指定的为 `30001`，所以 Dashboard UI 的访问地址为 [https://NodeIP:30001](https://10.0.1.203:30001)。
 
 并且在上述 Ansible Role 执行完成之后会在 `hosts.yml` 同级目录下生成一个 `dashboard_token.txt` 文件，该文件名由 `hosts.yml` 中的 `dashboard_token_file` 指定，该文件中保存了具备访问 Dashboard UI 权限的用户的 Token，如下：
@@ -326,60 +390,64 @@ eyJhbGciOiJSUzI1NiIsImtpZCI6IlhjQU9EckdpRHpSNTZTQXoyMjJHa3lRWVd4UGw2ZGhhNjk0RkhU
 
  进入 Dashboard UI 页面后选择 Token 认证直接填入该 Token 就可以登入。
 
-### 添加 Node 节点
+### 检查 Ingress
 
-要添加 Node 节点也很简单，仅需在 `hosts.yml` 下新添加一个节点，并添加一个主机变量 `node: yes` 标识它为 Node 节点，我这里要添加一个 `10.0.1.204` 的主机为新 Node，所以在 `hosts.yml` 中添加配置如下：
-
-```yml
-all:
-  vars:
-    ansible_user: root
-    ansible_ssh_pass: root1234
-    ansible_sudo_pass: root1234
-    ...
-  hosts:
-    ...
-    10.0.1.203: 
-      hostname: k8s-node1
-      etcd: yes
-      node: yes
-    10.0.1.204:
-      hostname: k8s-node2
-      node: yes
-```
-
-然后执行 Playbook 时限定仅执行新 Node 节点相关的 Task，如下：
+当前默认使用的是 HAProxy Ingress-Controller，检查是否部署成功：
 
 ```bash
-$ sudo ansible-playbook -i hosts.yml run.yml --limit 10.0.1.204
+$ kubectl get pod -n haproxy-controller -o wide
+NAME                                     READY   STATUS    RESTARTS   AGE   IP           NODE        NOMINATED NODE   READINESS GATES
+haproxy-ingress-jtldj                    1/1     Running   0          10m   10.0.1.203   k8s-node1   <none>           <none>
+ingress-default-backend-c675c85f-6k974   1/1     Running   0          30m   10.244.2.6   k8s-node1   <none>           <none>
 ```
 
-> 如果需要同时添加多个 Node 节点，有如下两种方法：
->
-> 1. 使用 `--limit` 时后面指定多个 Node IP，以逗号 `,` 分隔；
-> 2. 可以将多个 Node 节点的 IP 保存到一个文本文件，每行一个 IP，然后执行 `ansible-playbook` 时使用 `--limit @<文件名>` 即可；
+由于上面我在 `k8s-node1` 节点下添加了 `ingress: yes` 属性，所以仅会在该节点下部署 Ingress-Controller。
 
-执行完成后在 Master 节点可以接收到新 Node 中的 Kubulet 发出的证书申请：
+这里先使用 Nginx 镜像创建一个 `Deployment` 资源，然后使用 `Service` 资源暴露它到集群内部：
 
 ```bash
-$ kubectl get csr | grep Pending
-node-csr-jHEi1_yP3TNX80M8_4KPRxIziC7E-bkf07rJpa_l4Vw   2m16s   kubernetes.io/kube-apiserver-client-kubelet   kubelet-bootstrap   Pending
+$ kubectl create deploy nginx-web --image=nginx
+deployment.apps/nginx-web created
+$ kubectl expose deploy nginx-web --target-port=80 --port=80
+service/nginx-web exposed
 ```
 
-直接在 Master 节点执行下面命令允许签发证书即可：
+下面添加一下 `Ingress` 规则来检查 Ingress-Controller 是否运作正常，定义如下 `Ingress` 规则：
 
 ```bash
-$ kubectl get csr | awk '$NF=="Pending"{print $1}' | xargs -i kubectl certificate approve {}
-certificatesigningrequest.certificates.k8s.io/node-csr-jHEi1_yP3TNX80M8_4KPRxIziC7E-bkf07rJpa_l4Vw approved
+$ cat web-ingress.yml 
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: "www.zze.cn"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-web
+            port:
+              number: 80
 ```
 
-然后就可以查看到新加入的节点了：
+修改本机电脑的 hosts 进行测试，解析 `www.zze.cn` 到部署了 Ingress-Controller 的节点，访问结果如下：
 
 ```bash
-$ kubectl get node
-NAME          STATUS     ROLES    AGE   VERSION
-k8s-master1   Ready      <none>   26m   v1.19.0
-k8s-master2   Ready      <none>   21m   v1.19.0
-k8s-node1     Ready      <none>   26m   v1.19.0
-k8s-node2     NotReady   <none>   22s   v1.19.0
+$ curl -I www.zze.cn
+HTTP/1.1 200 OK
+server: nginx/1.19.3
+date: Wed, 28 Oct 2020 07:58:13 GMT
+content-type: text/html
+content-length: 612
+last-modified: Tue, 29 Sep 2020 14:12:31 GMT
+etag: "5f7340cf-264"
+accept-ranges: bytes
 ```
+
+OK，Ingress-Controller  也工作正常~
