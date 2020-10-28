@@ -11,6 +11,7 @@
     node_list_str: '{% for host in groups["all"] %}{% if "node" in hostvars[host] and hostvars[host].node %}{{ host }},{% endif %}{% endfor %}'
     etcd_list_str: '{% for host in groups["all"] %}{% if "etcd" in hostvars[host] and hostvars[host].etcd %}{{ host }},{% endif %}{% endfor %}'
     proxy_master_list_str: '{% for host in groups["all"] %}{% if "proxy_master" in hostvars[host] and hostvars[host].proxy_master %}{{ host }},{% endif %}{% endfor %}'
+    ingress_list_str: '{% for host in groups["all"] %}{% if "ingress" in hostvars[host] and hostvars[host].ingress %}{{ hostvars[host].hostname }},{% endif %}{% endfor %}'
     max_proxy_priority: '{% set max = 0 %}{% for host in groups["all"] %}{% if "proxy_priority" in hostvars[host] %}{% if hostvars[host].proxy_priority > max %}{% set max = hostvars[host].proxy_priority%}{% if loop.last %}{{ max }}{% endif %}{% endif %}{% endif %}{% endfor %}'
 
 - name: 设置变量 (1/1)
@@ -19,6 +20,7 @@
     master_list: '{{ master_list_str[0:-1].split(",") }}'
     node_list: '{{ node_list_str[0:-1].split(",") }}'
     etcd_list: '{{ etcd_list_str[0:-1].split(",") }}'
+    ingress_list: '{{ ingress_list_str[0:-1].split(",") }}'
     proxy_master_list: '{{ proxy_master_list_str[0:-1].split(",") }}'
     manifests_dir: '{{ "manifests" | realpath }}'
     etcd_tls_dir: '{{ tls_dir }}/etcd'

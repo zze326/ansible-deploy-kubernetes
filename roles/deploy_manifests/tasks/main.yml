@@ -16,10 +16,15 @@
   tags:
   - deploy_flannel
 
-- import_tasks: deploy_dashboard.yml
-  tags:
-  - deploy_dashboard
-
 - import_tasks: deploy_coredns.yml
   tags:
   - deploy_coredns
+
+- import_tasks: deploy_ingress.yml
+  when: enable_ingress is defined and enable_ingress
+  tags:
+  - deploy_ingress
+
+- import_tasks: deploy_dashboard.yml
+  tags:
+  - deploy_dashboard
