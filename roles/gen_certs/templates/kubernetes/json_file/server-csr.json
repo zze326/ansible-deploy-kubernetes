@@ -11,22 +11,22 @@
 {% if is_mutil_master %}
 {% for host in groups['all'] %}
     {% if ('master' in hostvars[host] and hostvars[host].master) or ('proxy_master' in hostvars[host] and hostvars[host].proxy_master) %}
-    "{{ host }}"{% if not loop.last %},{% endif %}{% if loop.last and api_server_ext_ip_list is defined and api_server_ext_ip_list %},{% endif %}
+    "{{ host }}",
 
     {% endif %}
 {% endfor %}
 {% else %}
 {% for host in groups['all'] %}
     {% if ('master' in hostvars[host] and hostvars[host].master) %}
-    "{{ host }}"{% if not loop.last %},{% endif %}{% if loop.last and api_server_ext_ip_list is defined and api_server_ext_ip_list %},{% endif %}
+    "{{ host }}",
 
     {% endif %}
 {% endfor %}
 {% endif %}
 {% if api_server_ext_ip_list is defined %}
 {% for host in api_server_ext_ip_list %}
-    "{{ host }}"{% if not loop.last %},{% endif %}
-{% endfor %}{% endif %},"{{ virtual_ip }}"
+    "{{ host }}",
+{% endfor %}{% endif %}"{{ virtual_ip }}"
     ],
     "key": {
         "algo": "rsa",
