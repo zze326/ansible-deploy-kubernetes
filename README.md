@@ -234,7 +234,7 @@ PLAY RECAP *********************************************************************
 10.0.1.202                 : ok=68   changed=35   unreachable=0    failed=0    skipped=27   rescued=0    ignored=0   
 10.0.1.203                 : ok=49   changed=24   unreachable=0    failed=0    skipped=46   rescued=0    ignored=0  
 ```
-目前 Ansible 的最后一个 Task 是 `部署  coredns`，到这里说明你的 Ansible 顺利执行完成了。
+
 ## 添加 Node 节点
 
 要添加 Node 节点也很简单，仅需在 `hosts.yml` 下新添加一个节点，并添加一个主机变量 `node: yes` 标识它为 Node 节点，我这里要添加一个 `10.0.1.204` 的主机为新 Node，所以在 `hosts.yml` 中添加配置如下：
