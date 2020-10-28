@@ -39,9 +39,9 @@ $ tar xf kubernetes-1.19.0-zze-ansible.bin.tar.gz -C /opt/
 $ tree /opt/packages/
 /opt/packages/
 ├── cfssl
-│   ├── cfssl-certinfo_linux-amd64
-│   ├── cfssljson_linux-amd64
-│   └── cfssl_linux-amd64
+│   ├── cfssl-certinfo_linux-amd64
+│   ├── cfssljson_linux-amd64
+│   └── cfssl_linux-amd64
 ├── cni-plugins-linux-amd64-v0.8.7.tgz
 ├── docker-19.03.9.tgz
 ├── etcd-v3.4.13-linux-amd64.tar.gz
@@ -79,7 +79,8 @@ hosts.yml  manifests  README.md  roles  run.yml
 - `roles`：标准的 Ansible 角色目录；
 - `run.yml`：此 Ansible 的入口 Playbook；
 
-## 配置修改
+## 配置说明
+
 为让部署操作简单易懂，我将所有可能修改的配置都放到了 `hosts.yml` 文件中，下面对 `hosts.yml` 配置进行说明：
 
 ```yaml
@@ -165,8 +166,53 @@ all:
 - `10.0.1.201` 和 `10.0.1.202` 作为 Master 的同时也会作为 API Server 的代理节点；
 - `10.0.1.201` 的优先级（`proxy_priority`）比 `10.0.1.202` 高，所以最终 Keepalived 管理的 VIP 会优先绑定到 `10.0.1.201` 上；
 
-## 执行部署操作
-按需修改 `hosts.yml`，大部分配置保持默认即可，几乎仅需要修改节点 IP 和密码，修改完成后执行下面命令开始部署操作：
+## 开始部署
+
+按需修改 `hosts.yml`，大部分配置保持默认即可，几乎仅需要修改节点 IP 和密码，我这里修改完配置之后 `hosts.yml` 内容如下：
+
+```yaml
+all:
+  vars:
+    ansible_user: root
+    ansible_ssh_pass: root1234
+    ansible_sudo_pass: root1234
+    is_mutil_master: yes
+    virtual_ip: 10.0.1.200
+    virtual_ip_device: eth0
+    proxy_master_port: 7443
+    install_dir: /opt/apps/
+    package_dir: /opt/packages/
+    tls_dir: /opt/k8s_tls
+    ntp_host: ntp1.aliyun.com
+    have_network: yes
+    replace_repo: yes
+    docker_registry_mirrors: https://7hsct51i.mirror.aliyuncs.com
+    kubelet_bootstrap_token: 8fba966b6e3b5d182960a30f6cb94428
+    pause_image: registry.cn-shenzhen.aliyuncs.com/zze/pause:3.2
+    dashboard_port: 30001
+    dashboard_token_file: dashboard_token.txt
+  hosts:
+    10.0.1.201:
+      hostname: k8s-master1
+      master: yes
+      node: yes
+      etcd: yes
+      proxy_master: yes
+      proxy_priority: 110
+    10.0.1.202:
+      hostname: k8s-master2
+      master: yes
+      node: yes
+      etcd: yes
+      proxy_master: yes
+      proxy_priority: 100
+    10.0.1.203: 
+      hostname: k8s-node1
+      etcd: yes
+      node: yes
+```
+
+修改完成后执行下面命令开始部署操作：
 
 ```bash
 $ sudo ansible-playbook -i hosts.yml run.yml
@@ -181,8 +227,12 @@ PLAY RECAP *********************************************************************
 10.0.1.202                 : ok=68   changed=35   unreachable=0    failed=0    skipped=27   rescued=0    ignored=0   
 10.0.1.203                 : ok=49   changed=24   unreachable=0    failed=0    skipped=46   rescued=0    ignored=0  
 ```
+目前 Ansible 的最后一个 Task 是 `部署  coredns`，到这里说明你的 Ansible 顺利执行完成了。
+
 ## 检查
+
 ### 检查 Node
+
 在 Master 节点（`10.0.1.201` 或 `10.0.1.202`）上检查 Node 是否正常：
 
 ```bash
@@ -265,6 +315,71 @@ Address 1: 10.0.0.1 kubernetes.default.svc.cluster.local
 ### 检查 Dashboard UI
 这里我将 Dashboard 服务默认使用 `NodePort` 类型的 `Service` 暴露服务，其暴露端口由 `hosts.yml` 中的 `dashboard_port` 指定，这里我指定的为 `30001`，所以 Dashboard UI 的访问地址为 [https://NodeIP:30001](https://10.0.1.203:30001)。
 
-并且在上述 Ansible Role 执行完成之后会在 `hosts.yml` 同级目录下生成一个 `dashboard_token.txt` 文件，该文件名由 `hosts.yml` 中的 `dashboard_token_file` 指定，该文件中保存了具备访问 Dashboard UI 权限的用户的 Token， 进入 Dashboard UI 页面后直接使用该 Token 就可以登入。
+并且在上述 Ansible Role 执行完成之后会在 `hosts.yml` 同级目录下生成一个 `dashboard_token.txt` 文件，该文件名由 `hosts.yml` 中的 `dashboard_token_file` 指定，该文件中保存了具备访问 Dashboard UI 权限的用户的 Token，如下：
 
+```bash
+$ ls
+dashboard_token.txt  hosts.yml  manifests  README.md  roles  run.yml
+$ cat dashboard_token.txt 
+eyJhbGciOiJSUzI1NiIsImtpZCI6IlhjQU9EckdpRHpSNTZTQXoyMjJHa3lRWVd4UGw2ZGhhNjk0RkhUZlBKWkUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkYXNoYm9hcmQtYWRtaW4tdG9rZW4tOTc2NTYiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGFzaGJvYXJkLWFkbWluIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiN2ZjNzE3YzctYjk5MS00NjFiLWE5MGUtNTkyYjQ0Njc3MzM4Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmUtc3lzdGVtOmRhc2hib2FyZC1hZG1pbiJ9.PgNaPBkI28hv2jmFF5z5DKSI2Rl_0PNHxAQn9-t-033Lr7aIW7NL8QE_1Nj4fAJ692VY85bEFiHXAsStyxusMeN6LvJTRGbcZaWZN0YbqX5Q6n22VE0goadGStfVmuSGkB-fyDe5WACTFJPN9EdXbgXtkD4Ny5CX4Kzv3S9iigs_58UBRhwkBs2BVuE_5PT361KK82HP6yvS-YYGRqTHEvRyk4AQ2L4Dh7NSYH8pFba-n5nT4K8wOlbqdkdQN62S5KkabYOEzHBX8WoHTERr36YxhpMvhk3o0iWgkGiOaxEfjwamtz5SDb3NQvRGqNXwNsTRh48Xw8hDfYRf7s6d-g
+```
 
+ 进入 Dashboard UI 页面后选择 Token 认证直接填入该 Token 就可以登入。
+
+### 添加 Node 节点
+
+要添加 Node 节点也很简单，仅需在 `hosts.yml` 下新添加一个节点，并添加一个主机变量 `node: yes` 标识它为 Node 节点，我这里要添加一个 `10.0.1.204` 的主机为新 Node，所以在 `hosts.yml` 中添加配置如下：
+
+```yml
+all:
+  vars:
+    ansible_user: root
+    ansible_ssh_pass: root1234
+    ansible_sudo_pass: root1234
+   	...
+  hosts:
+	...
+    10.0.1.203: 
+      hostname: k8s-node1
+      etcd: yes
+      node: yes
+    10.0.1.204:
+      hostname: k8s-node2
+      node: yes
+```
+
+然后执行 Playbook 时限定仅执行新 Node 节点相关的 Task，如下：
+
+```bash
+$ sudo ansible-playbook -i hosts.yml run.yml --limit 10.0.1.204
+```
+
+> 如果需要同时添加多个 Node 节点，有如下两种方法：
+>
+> 1. 使用 `--limit` 时后面指定多个 Node IP，以逗号 `,` 分隔；
+> 2. 可以将多个 Node 节点的 IP 保存到一个文本文件，每行一个 IP，然后执行 `ansible-playbook` 时使用 `--limit @<文件名>` 即可；
+
+执行完成后在 Master 节点可以接收到新 Node 中的 Kubulet 发出的证书申请：
+
+```bash
+$ kubectl get csr | grep Pending
+node-csr-jHEi1_yP3TNX80M8_4KPRxIziC7E-bkf07rJpa_l4Vw   2m16s   kubernetes.io/kube-apiserver-client-kubelet   kubelet-bootstrap   Pending
+```
+
+直接在 Master 节点执行下面命令允许签发证书即可：
+
+```bash
+$ kubectl get csr | awk '$NF=="Pending"{print $1}' | xargs -i kubectl certificate approve {}
+certificatesigningrequest.certificates.k8s.io/node-csr-jHEi1_yP3TNX80M8_4KPRxIziC7E-bkf07rJpa_l4Vw approved
+```
+
+然后就可以查看到新加入的节点了：
+
+```bash
+$ kubectl get node
+NAME          STATUS     ROLES    AGE   VERSION
+k8s-master1   Ready      <none>   26m   v1.19.0
+k8s-master2   Ready      <none>   21m   v1.19.0
+k8s-node1     Ready      <none>   26m   v1.19.0
+k8s-node2     NotReady   <none>   22s   v1.19.0
+```
