@@ -1,12 +1,10 @@
 - name: 签发 Kubelet 申请的证书 - 阻塞直到证书申请 Token 个数与 Node 节点个数相同 (1/2)
-  become: yes
   shell: |
     until [ `kubectl get csr | awk '$NF=="Pending"{print $1}' | wc -l` -eq {{ node_list | length }} ];do
       sleep 5;
     done
   
 - name: 签发 Kubelet 申请的证书 - 签发证书 (2/2)
-  become: yes
   shell: |
     until kubectl get csr | awk '$NF=="Pending"{print $1}' | xargs -i kubectl certificate approve {};do
       sleep 5;

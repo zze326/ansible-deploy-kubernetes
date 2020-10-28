@@ -1,5 +1,4 @@
 - name: 检查是否 ETCD 二进制包是否已存在
-  become: yes
   ignore_errors: yes
   changed_when: no
   failed_when: no
@@ -7,13 +6,19 @@
   register: check_result
 - block:
   - name: 解压 ETCD 安装包
-    become: yes
     unarchive:
       src: '{{ item }}'
       dest: /tmp
     with_fileglob: '{{ package_dir }}/{{ etcd_package_name }}.tar.gz'
 
+  - name: 获取 ETCD 安装包的解压路径
+    changed_when: false
+    shell: find /tmp/ -type d -name '{{ etcd_package_name }}'
+    register: etcd_package_dir_result
+
   - name: 移动可执行文件到 /opt/apps/etcd/bin
-    become: yes
-    shell: mv /tmp/{{ etcd_package_name }}/{etcd,etcdctl} /opt/apps/etcd/bin
+    shell: mv {{ etcd_package_dir_result.stdout_lines[0] }}/{{ item s}} /opt/apps/etcd/bin
+    with_items:
+    - etcd
+    - etcdctl
   when: check_result.rc != 0

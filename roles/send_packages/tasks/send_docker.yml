@@ -1,5 +1,4 @@
 - name: 检查是否 docker 二进制包是否已存在
-  become: yes
   ignore_errors: yes
   shell: 'cd /opt/apps/docker/bin && [ -f containerd ] && [ -f containerd-shim ] && [ -f ctr ] && [ -f docker ] && [ -f dockerd ] && [ -f docker-init ] && [ -f docker-proxy ] && [ -f runc ]'
   changed_when: no
@@ -7,19 +6,16 @@
   register: check_result
 - block:
   - name: 解压 docker 安装包
-    become: yes
     unarchive:
       src: '{{ item }}'
       dest: /tmp
     with_fileglob: '{{ package_dir }}/{{ docker_package_name }}.tgz'
 
   - name: 移动可执行文件到 /opt/apps/docker/bin
-    become: yes
     shell: mv /tmp/{{ docker_package_name }}/* /opt/apps/docker/bin
   when: check_result.rc != 0
 
 - name: 为 Docker 二进制文件创建软链接到 PATH 下 - 获取二进制文件路径列表 (1/2)
-  become: yes
   shell: find /opt/apps/docker/bin/ -type f
   changed_when: no
   register: docker_bin_list

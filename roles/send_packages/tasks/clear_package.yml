@@ -1,5 +1,4 @@
 - name: 获取解压目录路径
-  become: yes
   ignore_errors: yes
   changed_when: no
   failed_when: no
@@ -7,7 +6,6 @@
   register: check_package_result
 
 - name: 清理解压目录
-  become: yes
   file:
     path: '{{ item }}'
     state: absent

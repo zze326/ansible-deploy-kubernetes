@@ -8,25 +8,31 @@
       - check_config
     # 基础环境
     - role: base_environment
+      become: yes
       tags:
       - base_environment
     # 签发证书
     - role: gen_certs
+      become: yes
       tags:
       - gen_certs
     # 分发二进制包
     - role: send_packages
+      become: yes
       tags:
       - send_packages
     # 配置服务
     - role: configure_service
+      become: yes
       tags:
       - configure_service
     # 启动服务
     - role: start_service
+      become: yes
       tags:
       - start_service
     # 部署资源
     - role: deploy_manifests
+      become: yes
       tags:
       - deploy_manifests

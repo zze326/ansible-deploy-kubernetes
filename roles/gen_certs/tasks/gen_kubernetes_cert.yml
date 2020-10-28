@@ -10,7 +10,6 @@
 
 - block:
   - name: 生成 kubernetes 证书 - 创建证书存放目录 (1/4)
-    become: yes
     run_once: yes
     connection: local
     file:
@@ -18,7 +17,6 @@
       state: directory
 
   - name: 生成 kubernetes 证书 - 渲染 kubernetes 证书生成 shell (2/4)
-    become: yes
     run_once: yes
     connection: local
     template:
@@ -27,7 +25,6 @@
       mode: '0755'
 
   - name: 生成 kubernetes 证书 - 渲染 csr 请求文件 (3/4)
-    become: yes
     run_once: yes
     connection: local
     template:
@@ -36,7 +33,6 @@
     with_fileglob: templates/kubernetes/json_file/*
 
   - name: 生成 kubernetes 证书 - 生成证书 (4/4)
-    become: yes
     run_once: yes
     connection: local
     script: '{{ kubernetes_tls_dir }}/gen_certs.sh'
@@ -45,7 +41,6 @@
   when: kubernetes_exists.rc != 0
 
 - name: 分发证书到 kubernetes 节点 - 分发到 master 节点 (1/2)
-  become: yes
   copy:
     src: '{{ item }}'
     dest: '{{ install_dir }}/kubernetes/ssl/'
@@ -55,7 +50,6 @@
   when: master is defined and master
 
 - name: 分发证书到 kubernetes 节点 - 分发到 node 节点 (2/2)
-  become: yes
   copy:
     src: '{{ item }}'
     dest: '{{ install_dir }}/kubernetes/ssl/'

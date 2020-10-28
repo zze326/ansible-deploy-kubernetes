@@ -1,18 +1,15 @@
 - name: 渲染 Nginx 主配置文件
-  become: yes
   template:
     src: nginx/nginx.conf
     dest: '{{install_dir}}/nginx/conf/nginx.conf'
 
 - name: 渲染 Nginx 虚拟主机配置文件
-  become: yes
   template:
     src: '{{item}}'
     dest: '{{install_dir}}/nginx/conf/conf.d'
   with_fileglob: templates/nginx/conf.d/*.conf
 
 - name: 渲染 Keepalived 配置文件
-  become: yes
   template:
     src: 'keepalived/keepalived.conf'
     dest: '{{install_dir}}/keepalived/conf/keepalived.conf'

@@ -1,5 +1,4 @@
 - name: 将 cfssl 可执行文件移动添加到 PATH 路径下
-  become: yes
   run_once: yes
   connection: local
   copy:

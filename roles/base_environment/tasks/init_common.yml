@@ -1,13 +1,3 @@
-- name: 关闭 Swap - swap off -a (1/2)
-  shell: |
-    /usr/sbin/swapoff -a
-
-- name: 关闭 Swap - /etc/fstab (2/2)
-  replace:
-    path: /etc/fstab
-    regexp: '^([^#].*\sswap\s+\s+.*)$'
-    replace: '# \1'
-
 - name: 修改主机名
   hostname:
     name: '{{ hostname }}'
@@ -19,7 +9,6 @@
   with_items: '{{ groups["all"] }}'
 
 - name: 设定相关内核参数 - 文件描述符(1/3)
-  become: yes
   sysctl:
     key: '{{ item.key }}'
     value: '{{ item.value }}'
@@ -31,13 +20,11 @@
     - {'key': 'fs.file-max', 'value': '65535'}
 
 - name: 设定相关内核参数 - 桥接流量与核心转发 (2/3)
-  become: yes
   copy:
     src: k8s.conf
     dest: /etc/sysctl.d/k8s.conf
 
 - name: 设定相关内核参数 - 重载配置 (3/3)
-  become: yes
   changed_when: no
   shell: sysctl --system 
 
@@ -50,16 +37,6 @@
     - '*               soft    nofile          65535'
     - 'root            hard    nofile          65535'
     - 'root            soft    nofile          65535'
-
-- name: 加载 IPVS 模块 - 修改 /etc/rc.local (1/2)
-  lineinfile:
-    line: 'for i in $(ls /usr/lib/modules/$(uname -r)/kernel/net/netfilter/ipvs|grep -o "^[^.]*");do /sbin/modinfo -F filename $i >/dev/null 2>&1 && /sbin/modprobe $i;done' 
-    path: /etc/rc.d/rc.local
-    mode: '0755'
-
-- name: 加载 IPVS 模块 - 立即加载 (2/2)
-  changed_when: no
-  shell: source /etc/rc.local
 
 - name: 时间同步
   cron:
