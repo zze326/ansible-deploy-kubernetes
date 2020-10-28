@@ -7,7 +7,7 @@
 - [x] 一键加入新的 Node；
 - [x] Ingress-Controller 自动部署；
 - [x] 多 Master 高可用（Keepalived + Nginx）一键部署；
-- [ ] 支持 Ubuntu；
+- [x] 透明支持 CentOS 和 Ubuntu；
 - [ ] 支持完全离线部署；
 - [ ] CNI 插件可选配置；
 - [ ] Ingress-Controller 可选配置；
