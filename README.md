@@ -436,7 +436,7 @@ spec:
               number: 80
 ```
 
-修改本机电脑的 hosts 进行测试，解析 `www.zze.cn` 到部署了 Ingress-Controller 的节点，访问结果如下：
+修改本机的 hosts 进行测试，解析 `www.zze.cn` 到部署了 Ingress-Controller 的节点，访问结果如下：
 
 ```bash
 $ curl -I www.zze.cn
