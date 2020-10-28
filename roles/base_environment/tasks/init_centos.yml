@@ -10,7 +10,9 @@
 
 - name: 安装 ntpdate
   yum:
-    name: ntpdate
+    name: 
+    - ntpdate
+    - bash-completion
   when: have_network
 
 - block:

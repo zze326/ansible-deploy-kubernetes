@@ -31,6 +31,14 @@
       src: /opt/apps/kubernetes/bin/kubectl
       dest: /usr/local/bin/kubectl
       state: link
+  
+  - name: 为 kubectl 设置命令补全
+    failed_when: no
+    shell: |
+      kubectl completion bash > /usr/share/bash-completion/completions/kubectl \
+        && . /usr/share/bash-completion/completions/kubectl
+    when: have_network is defined and have_network
+    
   when: master is defined and master
 
 - name: 分发 node 需要的二进制程序文件
