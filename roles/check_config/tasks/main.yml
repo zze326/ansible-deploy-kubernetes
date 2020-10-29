@@ -74,12 +74,16 @@
 
 - name: 检查 Master (8/8)
   fail:
-    msg: '{{ item }} 使用 proxy_master: yes 标识了它为 api-server 代理节点，但是没有使用 proxy_priority 来指定 VIP 的权重'
-  when: ansible_host == item and not proxy_priority is defined
-  with_items: '{{ proxy_master_list }}'
+    msg: '{{ ansible_host }} 使用 proxy_master: yes 标识了它为 api-server 代理节点，但是没有使用 proxy_priority 来指定 VIP 的权重'
+  when: ansible_host in proxy_master_list and not proxy_priority is defined
 
 - name: 检查 Node 节点 (1/1)
   fail:
     msg: '至少需要一个 Node 节点'
   run_once: yes
   when: node_list[0] == ""
+
+- name: 检查代理节点使用的网卡
+  fail:
+    msg: '{{ ansible_host }} 指定了 virtual_ip_device: {{ virtual_ip_device }}，但该主机上不存在名为 {{ virtual_ip_device }} 的设备'
+  when: ansible_host in proxy_master_list and not (virtual_ip_device in ansible_interfaces)
