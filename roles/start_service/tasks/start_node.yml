@@ -1,5 +1,4 @@
 - name: 启动 Node 相关服务
-  become: yes
   systemd:
     name: '{{ item }}'
     state: started

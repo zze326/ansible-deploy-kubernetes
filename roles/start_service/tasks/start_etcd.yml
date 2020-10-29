@@ -1,5 +1,4 @@
 - name: 启动 ETCD 服务
-  become: yes
   systemd:
     name: etcd
     state: started

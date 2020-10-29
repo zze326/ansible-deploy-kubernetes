@@ -14,6 +14,12 @@
     ingress_list_str: '{% for host in groups["all"] %}{% if "ingress" in hostvars[host] and hostvars[host].ingress %}{{ hostvars[host].hostname }},{% endif %}{% endfor %}'
     max_proxy_priority: '{% set max = 0 %}{% for host in groups["all"] %}{% if "proxy_priority" in hostvars[host] %}{% if hostvars[host].proxy_priority > max %}{% set max = hostvars[host].proxy_priority%}{% if loop.last %}{{ max }}{% endif %}{% endif %}{% endif %}{% endfor %}'
 
+- name: 获取当前执行 ansible-playbook 的用户名
+  run_once: yes
+  connection: local
+  shell: whoami
+  register: user_result
+
 - name: 设置变量 (1/1)
   run_once: yes
   set_fact:
@@ -29,6 +35,7 @@
     cfssl_certinfo_bin: '/usr/local/bin/cfssl-certinfo'
     cfssl_json_bin: '/usr/local/bin/cfssl-json'
     dashboard_namespace: kubernetes-dashboard
+    exec_user: '{{ user_result.stdout }}'
 
 - name: 检查 Master 节点 (1/8)
   fail:

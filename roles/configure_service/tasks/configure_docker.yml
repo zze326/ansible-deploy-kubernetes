@@ -1,11 +1,9 @@
 - name: 渲染 Docker 配置文件
-  become: yes
   template:
     src: docker/conf/daemon.json
     dest: /opt/apps/docker/conf/daemon.json
 
 - name: 渲染 Docker Service unit 文件
-  become: yes
   template:
     src: docker/systemd/docker.service
-    dest: /usr/lib/systemd/system/docker.service
+    dest: '{% if ansible_distribution == "CentOS" %}/usr{% endif %}/lib/systemd/system/docker.service'

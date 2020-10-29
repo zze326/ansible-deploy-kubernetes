@@ -1,16 +1,22 @@
-- name: 关闭防火墙
-  systemd:
-    name: networking
-    state: stopped
-    enabled: no
-
 - name: 安装 ntpdate
   apt:
-    name: ntpdate
+    name: 
+    - ntpdate
+    - bash-completion
   when: have_network
 
-- name: 替换 yum 源为阿里云 - 修改 yum 源 (1/1)
+- name: 替换 apt 源为阿里云
   copy:
-    src: 'ubuntu{{ ansible_distribution_major_version }}-repo/source.list'
+    src: 'ubuntu{{ ansible_distribution_major_version }}-repo/sources.list'
     dest: /etc/apt/sources.list
   when: have_network and replace_repo
+
+- name: 关闭 Swap - swap off -a (1/2)
+  shell: |
+    /sbin/swapoff -a
+
+- name: 关闭 Swap - /etc/fstab (2/2)
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*\sswap\s+\s+.*)$'
+    replace: '# \1'

@@ -25,3 +25,13 @@
       dest: /etc/yum.repos.d/
     with_fileglob: centos7-repo/*
   when: have_network and replace_repo
+
+- name: 关闭 Swap - swap off -a (1/2)
+  shell: |
+    /usr/sbin/swapoff -a
+
+- name: 关闭 Swap - /etc/fstab (2/2)
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*\sswap\s+\s+.*)$'
+    replace: '# \1'

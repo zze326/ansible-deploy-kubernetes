@@ -7,12 +7,14 @@
 - [x] 一键加入新的 Node；
 - [x] Ingress-Controller 自动部署；
 - [x] 多 Master 高可用（Keepalived + Nginx）一键部署；
-- [ ] 支持 Ubuntu；
+- [x] 透明支持 CentOS 和 Ubuntu；
 - [ ] 支持完全离线部署；
 - [ ] CNI 插件可选配置；
 - [ ] Ingress-Controller 可选配置；
 
 > 如有疑惑或建议可提 ISSUE 或在 [此链接](https://www.zze.xyz/archives/kubernetes-deploy-binary-mutil-master.html) 下留言。
+> 这里我在 CentOS 7.8 和 Ubuntu 16.04 上进行了测试，完全能够一键跑完。
+> 要注意的是，如果你使用的是 Ubuntu，那么需要先在所有节点上装上 python 环境，因为 Ansible 依赖被控端的 python，而 Ubuntu 默认是没有的（CentOS 默认有），执行 `sudo apt install python-minimal` 安装即可。
 
 ## 环境准备
 
@@ -232,7 +234,7 @@ PLAY RECAP *********************************************************************
 10.0.1.202                 : ok=68   changed=35   unreachable=0    failed=0    skipped=27   rescued=0    ignored=0   
 10.0.1.203                 : ok=49   changed=24   unreachable=0    failed=0    skipped=46   rescued=0    ignored=0  
 ```
-目前 Ansible 的最后一个 Task 是 `部署  coredns`，到这里说明你的 Ansible 顺利执行完成了。
+
 ## 添加 Node 节点
 
 要添加 Node 节点也很简单，仅需在 `hosts.yml` 下新添加一个节点，并添加一个主机变量 `node: yes` 标识它为 Node 节点，我这里要添加一个 `10.0.1.204` 的主机为新 Node，所以在 `hosts.yml` 中添加配置如下：
