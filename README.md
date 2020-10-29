@@ -8,9 +8,6 @@
 - [x] Ingress-Controller 自动部署；
 - [x] 多 Master 高可用（Keepalived + Nginx）一键部署；
 - [x] 透明支持 CentOS 和 Ubuntu；
-- [ ] 支持完全离线部署；
-- [ ] CNI 插件可选配置；
-- [ ] Ingress-Controller 可选配置；
 
 > 如有疑惑或建议可提 ISSUE 或在 [此链接](https://www.zze.xyz/archives/kubernetes-deploy-binary-mutil-master.html) 下留言。
 > 这里我在 CentOS 7.8 和 Ubuntu 16.04 上进行了测试，完全能够一键跑完。
