@@ -55,7 +55,7 @@ packages/
 ├── cni-plugins-linux-amd64-v0.8.7.tgz
 ├── docker-19.03.9.tgz
 ├── etcd-v3.4.13-linux-amd64.tar.gz
-└── kubernetes-server-linux-amd64.tar.gz
+└── kubernetes-server-linux-amd64-v1.19.3.tar.gz
 
 1 directory, 7 files
 ```
