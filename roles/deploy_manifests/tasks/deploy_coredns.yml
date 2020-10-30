@@ -3,7 +3,7 @@
   changed_when: no
   run_once: yes
   connection: local
-  shell: 'ls {{ manifests_dir }}/*coredns*.yml {{ manifests_dir }}/*coredns*.yaml'
+  shell: 'ls {{ manifests_dir }}/*coredns*{{ major_version }}.{{ minor_version }}*.yml {{ manifests_dir }}/*coredns*{{ major_version }}.{{ minor_version }}*.yaml'
   register: check_coredns_result
 
 - name: 设置变量

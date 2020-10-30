@@ -1,8 +1,15 @@
-- name: 设置变量
-  set_fact:
-    rbac_filename: kubernetes_user_rbac.yml
-  
 - block:
+  - name: 获取 Kubernetes 版本号
+    run_once: yes
+    shell: 'kubectl version -o json'
+    register: k8s_version_result
+
+  - name: 设置变量
+    set_fact:
+      major_version: '{{ (k8s_version_result.stdout | from_json).serverVersion.major }}'
+      minor_version: '{{ (k8s_version_result.stdout | from_json).serverVersion.minor }}'
+      rbac_filename: kubernetes_user_rbac.yml
+
   - name: kubernetes 用户授权 - 分发权限 manifests 到 master 节点 (1/2)
     template:
       src: '{{ rbac_filename }}'
@@ -11,6 +18,11 @@
   - name: kubernetes 用户授权 - 执行授权操作 (2/2)
     shell: kubectl apply -f /tmp/{{ rbac_filename }}
   when: ansible_host == master_list[0]
+  tags:
+  - deploy_flannel
+  - deploy_coredns
+  - deploy_ingress
+  - deploy_dashboard
 
 - import_tasks: deploy_flannel.yml
   tags:
