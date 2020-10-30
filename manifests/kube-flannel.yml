@@ -214,7 +214,7 @@ spec:
       volumes:
       - name: run
         hostPath:
-          path: /run/flannel
+          path: /opt/apps/cni/conf
       - name: cni
         hostPath:
           path: /opt/apps/cni/conf
