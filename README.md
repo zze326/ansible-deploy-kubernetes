@@ -233,15 +233,22 @@ all:
 ```bash
 $ sudo ansible-playbook -i hosts.yml run.yml
 ...
-TASK [deploy_manifests : 部署 coredns] ****************************************************************************************************************************************************************
-skipping: [10.0.1.202] => (item=/root/kubernetes-deploy-ansible/manifests/coredns.yml) 
-skipping: [10.0.1.203] => (item=/root/kubernetes-deploy-ansible/manifests/coredns.yml) 
-changed: [10.0.1.201] => (item=/root/kubernetes-deploy-ansible/manifests/coredns.yml)
+TASK [deploy_manifests : 打印 token 信息] ***************************************************************************************************************************************************************
+ok: [10.0.1.201] => {
+    "msg": "token: eyJhbGciOiJSUzI1NiIsImtpZCI6IlVnU2Z6aTM1a0I1S3J5T04yVmMwQTNoWC0xZnF2RThybXBzQU9pcWhUYnMifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkYXNoYm9hcmQtYWRtaW4tdG9rZW4tamdzZHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGFzaGJvYXJkLWFkbWluIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiMWI3YzcxMWYtMGQwYi00MTJjLTkwMGEtMzY5ZmVmZGZiMzZjIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmUtc3lzdGVtOmRhc2hib2FyZC1hZG1pbiJ9.oxjPtZhyOylFO8mvWBJ6E8UD42161-jxLMXYeJuQSPKs_wioUqR2Fkx3p7DeYb3b0A4_I4cT0APC1nM1tQnuah9UH9wb6hryzdoiH8WVfNZjjGJcPCC59hMOLFfBswQOo5f9zIbZnMdDjo9NXo96RQrxlu_JxQM_l3UYpr2Gn5CRwZrMVQBRQ5mhDd2yTK-wF-I0rcwoIDAUGt-ajFRZ7J9V4AHxXjHDfA0XqVCay25ZKiJ50UkkGV0PCwU7VwZzdNqF-nOxRkhDnX7w13LVxlwaWvpBMcHimX2HU0P6orufslKlVrQAdj3nenZ4dKPW0Ss1ndK0nRUpOuOgd4hi7g"
+}
+skipping: [10.0.1.202]
+skipping: [10.0.1.203]
+
+TASK [deploy_manifests : 保存 token 到当前 ansible 目录] ***************************************************************************************************************************************************
+skipping: [10.0.1.202]
+skipping: [10.0.1.203]
+changed: [10.0.1.201]
 
 PLAY RECAP ******************************************************************************************************************************************************************************************
-10.0.1.201                 : ok=110  changed=58   unreachable=0    failed=0    skipped=15   rescued=0    ignored=0   
-10.0.1.202                 : ok=68   changed=35   unreachable=0    failed=0    skipped=27   rescued=0    ignored=0   
-10.0.1.203                 : ok=49   changed=24   unreachable=0    failed=0    skipped=46   rescued=0    ignored=0  
+10.0.1.201                 : ok=117  changed=82   unreachable=0    failed=0    skipped=19   rescued=0    ignored=0   
+10.0.1.202                 : ok=69   changed=53   unreachable=0    failed=0    skipped=33   rescued=0    ignored=0   
+10.0.1.203                 : ok=49   changed=39   unreachable=0    failed=0    skipped=53   rescued=0    ignored=0  
 ```
 
 ## 添加 Node 节点
