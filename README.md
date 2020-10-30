@@ -8,38 +8,46 @@
 - [x] Ingress-Controller 自动部署；
 - [x] 多 Master 高可用（Keepalived + Nginx）一键部署；
 - [x] 透明支持 CentOS 和 Ubuntu；
+- [x] 多版本兼容（已通过测试的版本有：`v1.17.x`、`v1.18.x`、`v1.19.x`）；
 
 > 如有疑惑或建议可提 ISSUE 或在 [此链接](https://www.zze.xyz/archives/kubernetes-deploy-binary-mutil-master.html) 下留言。
-> 
+>
 > 这里我在 CentOS 7.8 和 Ubuntu 16.04 上进行了测试，完全能够一键跑完。
-> 
+>
 > 要注意的是，如果你使用的是 Ubuntu，那么需要先在所有节点上装上 python 环境，因为 Ansible 依赖被控端的 python，而 Ubuntu 默认是没有的（CentOS 默认有），执行 `sudo apt install python-minimal` 安装即可。
 
 ## 环境准备
 
 ### 离线二进制包下载
 
-链接: <https://pan.baidu.com/s/1V5whngTx0AUF4ANU9m8ibw>  提取码: `9ce2`.
+链接：https://pan.baidu.com/s/1uJwhrINaO-SlTYSjeVOktw  提取码：`q3n1`。
 
-其中包含的二进制包如下：
-- CNI 插件(v0.87)
-- Docker(19.03.9)
-- ETCD(v3.4.13)
-- Kubernetes(1.19.0)
-- cfssl 二进制包；
+该链接提供的下载目录结构如下：
 
-下载好后将其上传到服务器上，如下：
 ```bash
-$ ls
-kubernetes-1.19.0-zze-ansible.bin.tar.gz
+├── kubernetes-server-linux-amd64-v1.17.13.tar.gz
+├── kubernetes-server-linux-amd64-v1.18.10.tar.gz
+├── kubernetes-server-linux-amd64-v1.19.3.tar.gz
+└── packages
+    ├── cfssl
+    │   ├── cfssl-certinfo_linux-amd64
+    │   ├── cfssljson_linux-amd64
+    │   └── cfssl_linux-amd64
+    ├── cni-plugins-linux-amd64-v0.8.7.tgz
+    ├── docker-19.03.9.tgz
+    └── etcd-v3.4.13-linux-amd64.tar.gz
 ```
 
-解压压缩包到 `/opt` 目录，解压后的所有文件会在 `packages` 目录下，所以解压后的压缩包路径就为 `/opt/packages` 了，操作如下：
+要下载的文件：
+
+- `packages` 目录下都是构建 Kubernetes 集群必需的组件和工具，直接下载该目录；
+- `kubernetes-server-linux-amd64-v*.tar.gz` 为对应版本的 Kubernetes 二进制包，选择一个你需要的版本即可，来源于官网未作任何修改，更多版本可[点击此链接](https://github.com/kubernetes/kubernetes/tree/master/CHANGELOG)自行选择合适的版本；
+
+下载好后它们上传到服务器，并将 Kubernetes 二进制包移动到 `packages` 目录下，我这里选择的是 `v1.19.3` 版本的二进制包，所以最终 `packages` 的目录结构如下：
 
 ```bash
-$ tar xf kubernetes-1.19.0-zze-ansible.bin.tar.gz -C /opt/
-$ tree /opt/packages/
-/opt/packages/
+$ tree packages/
+packages/
 ├── cfssl
 │   ├── cfssl-certinfo_linux-amd64
 │   ├── cfssljson_linux-amd64
@@ -51,7 +59,9 @@ $ tree /opt/packages/
 
 1 directory, 7 files
 ```
-<font color='red'>注意：这里之所以是解压到 `/opt` 目录下，是因为在 Ansible 变量中我默认使用的是这个目录，如果你不是使用这个目录，则需要修改对应的变量，在下面我会进行说明。</font>
+
+我这里将 `packages` 目录放到服务器的 `/opt` 目录下，所以最终 `packages` 目录的绝对路径为 `/opt/packages` ，这个路径要和后面 `hosts.yml` 中的 `package_dir` 变量值设置的路径对应。
+
 ### 安装 Ansible 和 Git
 安装 Ansible 和 Git，由于目前该 Ansible 仅支持 CentOS，所以我这里使用的是 CentOS 7.8 做演示，直接使用 YUM 安装即可：
 
@@ -286,10 +296,10 @@ certificatesigningrequest.certificates.k8s.io/node-csr-jHEi1_yP3TNX80M8_4KPRxIzi
 ```bash
 $ kubectl get node
 NAME          STATUS     ROLES    AGE   VERSION
-k8s-master1   Ready      <none>   26m   v1.19.0
-k8s-master2   Ready      <none>   21m   v1.19.0
-k8s-node1     Ready      <none>   26m   v1.19.0
-k8s-node2     NotReady   <none>   22s   v1.19.0
+k8s-master1   Ready      <none>   26m   v1.19.3
+k8s-master2   Ready      <none>   21m   v1.19.3
+k8s-node1     Ready      <none>   26m   v1.19.3
+k8s-node2     NotReady   <none>   22s   v1.19.3
 ```
 
 
