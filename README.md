@@ -68,6 +68,14 @@ packages/
 ```bash
 $ yum install ansible git -y
 ```
+如果使用的是 Ubuntu，那么此时不能直接使用 `apt` 来安装 Ansible，因为默认的版本太低了，需要执行下面的操作添加源来安装新版本的 Ansible：
+```
+$ sudo apt update
+$ sudo apt-get install software-properties-common
+$ sudo apt-add-repository --yes  ppa:ansible/ansible:2.7.6
+$ sudo apt update
+$ sudo apt-get install ansible
+```
 
 取消 Ansible 检查 Key（此步骤如果有疑问可百度或 Google）：
 ```bash
