@@ -7,7 +7,7 @@
 - [x] 一键加入新的 Node；
 - [x] Ingress-Controller 自动部署；
 - [x] 多 Master 高可用（Keepalived + Nginx）一键部署；
-- [x] 透明支持 CentOS 和 Ubuntu；
+- [x] 透明支持 CentOS 7 和 Ubuntu 16/18；
 - [x] 多版本兼容（已通过测试的版本有：`v1.17.x`、`v1.18.x`、`v1.19.x`）；
 
 > 如有疑惑或建议可提 ISSUE 或在 [此链接](https://www.zze.xyz/archives/kubernetes-deploy-binary-mutil-master.html) 下留言。
