@@ -20,3 +20,10 @@
     path: /etc/fstab
     regexp: '^([^#].*\sswap\s+\s+.*)$'
     replace: '# \1'
+
+- name: 为 Ubuntu 18 创建 /etc/rc.local
+  file:
+    path: /etc/rc.local
+    state: touch
+    mode: '0755'
+  when: ansible_distribution_major_version == '18'
