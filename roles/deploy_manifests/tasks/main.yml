@@ -17,6 +17,14 @@
 
   - name: kubernetes 用户授权 - 执行授权操作 (2/2)
     shell: kubectl apply -f /tmp/{{ rbac_filename }}
+  
+  - name: 设置各节点在集群中的角色
+    shell: |
+      {%- for host in groups["all"] -%}
+        {%- if "node" in hostvars[host] and hostvars[host].node -%}
+          kubectl label nodes {{ hostvars[host].hostname }} node-role.kubernetes.io/{% if "master" in hostvars[host] and hostvars[host].master %}master{% else %}node{% endif %}= --overwrite;
+        {%- endif -%}
+      {%- endfor -%}
   when: ansible_host == master_list[0]
   tags:
   - deploy_flannel
