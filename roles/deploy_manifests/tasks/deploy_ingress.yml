@@ -16,8 +16,8 @@
     become: yes
     failed_when: no
     shell: |
-      kubectl get node -l 'ingress=yes' | awk 'NR>1 && $1=="{{ item }}"{print $1}' | grep '{{ item }}' &> /dev/null \
-        || kubectl label node {{ item }} ingress=yes
+      kubectl get node -l 'ingress=yes' | awk 'NR>1 && $1=="{{ item }}"{print $1}' | grep '{{ item }}' \
+        || kubectl label node {{ item }} ingress='yes'
     with_items: '{{ ingress_list }}'
 
   - name: 分发 ingress-controller manifests 到 master 节点
