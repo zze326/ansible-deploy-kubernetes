@@ -21,9 +21,19 @@
     regexp: '^([^#].*\sswap\s+\s+.*)$'
     replace: '# \1'
 
-- name: 为 Ubuntu 18 创建 /etc/rc.local
-  file:
-    path: /etc/rc.local
-    state: touch
-    mode: '0755'
+- block:
+  - name: 为 Ubuntu 18 创建 /etc/rc.local
+    lineinfile:
+      path: /etc/rc.local
+      firstmatch: yes
+      insertbefore: '^'
+      line: '#!/bin/bash'
+      create: yes
+      mode: '0755'
+  
+  - name: 修改 /etc/resolv.conf 的链接文件
+    file:
+      src: /run/systemd/resolve/resolv.conf
+      path: /etc/resolv.conf
+      state: link
   when: ansible_distribution_major_version == '18'
