@@ -63,7 +63,7 @@ packages/
 我这里将 `packages` 目录放到服务器的 `/opt` 目录下，所以最终 `packages` 目录的绝对路径为 `/opt/packages` ，这个路径要和后面 `hosts.yml` 中的 `package_dir` 变量值设置的路径对应。
 
 ### 安装 Ansible 和 Git
-安装 Ansible 和 Git，由于目前该 Ansible 仅支持 CentOS，所以我这里使用的是 CentOS 7.8 做演示，直接使用 YUM 安装即可：
+安装 Ansible 和 Git，我这里使用的是 CentOS 7.8 做演示，直接使用 YUM 安装即可：
 
 ```bash
 $ yum install ansible git -y
