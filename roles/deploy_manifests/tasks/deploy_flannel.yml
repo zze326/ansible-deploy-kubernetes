@@ -29,7 +29,7 @@
 
 - block:
   - name: 分发 flannel manifests 到 master 节点
-    copy:
+    template:
       src: '{{ item }}'
       dest: /tmp/
     with_items: '{{ flannel_manifests_list }}'

@@ -15,7 +15,7 @@ authentication:
     cacheTTL: 2m0s
     enabled: true
   x509:
-    clientCAFile: /opt/apps/kubernetes/ssl/ca.pem 
+    clientCAFile: {{ install_dir }}/kubernetes/ssl/ca.pem 
 authorization:
   mode: Webhook
   webhook:

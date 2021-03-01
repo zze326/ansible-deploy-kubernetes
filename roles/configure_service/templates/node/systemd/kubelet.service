@@ -4,8 +4,8 @@ After=docker.service
 Before=docker.service
 
 [Service]
-EnvironmentFile=/opt/apps/kubernetes/conf/kubelet.conf
-ExecStart=/opt/apps/kubernetes/bin/kubelet $KUBELET_OPTS
+EnvironmentFile={{ install_dir }}/kubernetes/conf/kubelet.conf
+ExecStart={{ install_dir }}/kubernetes/bin/kubelet $KUBELET_OPTS
 Restart=on-failure
 LimitNOFILE=65535
 

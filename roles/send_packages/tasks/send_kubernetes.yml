@@ -15,7 +15,7 @@
   - name: 分发 master 需要的二进制程序文件
     copy:
       src: '{{ item }}'
-      dest: /opt/apps/kubernetes/bin
+      dest: '{{ install_dir }}/kubernetes/bin'
       mode: '0755'
     with_fileglob: 
     - '{{ kubernetes_bin_tmp_path }}/kube-apiserver'
@@ -25,7 +25,7 @@
 
   - name: 将 kubectl 软链接到 PATH 下
     file:
-      src: /opt/apps/kubernetes/bin/kubectl
+      src: '{{ install_dir }}/kubernetes/bin/kubectl'
       dest: /usr/local/bin/kubectl
       state: link
   
@@ -41,7 +41,7 @@
 - name: 分发 node 需要的二进制程序文件
   copy:
     src: '{{ item }}'
-    dest: /opt/apps/kubernetes/bin
+    dest: '{{ install_dir }}/kubernetes/bin'
     mode: '0755'
   with_fileglob: 
   - '{{ kubernetes_bin_tmp_path }}/kubelet'

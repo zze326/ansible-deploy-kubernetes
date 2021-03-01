@@ -6,8 +6,8 @@
 
   - name: 设置变量
     set_fact:
-      major_version: '{{ (k8s_version_result.stdout | from_json).serverVersion.major }}'
-      minor_version: '{{ (k8s_version_result.stdout | from_json).serverVersion.minor }}'
+      major_version: '1'
+      minor_version: '19'
       rbac_filename: kubernetes_user_rbac.yml
 
   - name: kubernetes 用户授权 - 分发权限 manifests 到 master 节点 (1/2)

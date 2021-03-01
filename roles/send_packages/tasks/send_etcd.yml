@@ -2,7 +2,7 @@
   ignore_errors: yes
   changed_when: no
   failed_when: no
-  shell: '[ -f /opt/apps/etcd/bin/etcd ] && [ -f /opt/apps/etcd/bin/etcdctl ]'
+  shell: '[ -f {{ install_dir }}/etcd/bin/etcd ] && [ -f {{ install_dir }}/etcd/bin/etcdctl ]'
   register: check_result
 - block:
   - name: 解压 ETCD 安装包
@@ -16,8 +16,8 @@
     shell: find /tmp/ -type d -name '{{ etcd_package_name }}'
     register: etcd_package_dir_result
 
-  - name: 移动可执行文件到 /opt/apps/etcd/bin
-    shell: mv {{ etcd_package_dir_result.stdout_lines[0] }}/{{ item }} /opt/apps/etcd/bin
+  - name: 移动可执行文件到 {{ install_dir }}/etcd/bin
+    shell: mv {{ etcd_package_dir_result.stdout_lines[0] }}/{{ item }} {{ install_dir }}/etcd/bin
     with_items:
     - etcd
     - etcdctl

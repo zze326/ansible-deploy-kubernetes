@@ -31,7 +31,7 @@
   - name: 使用自签的证书创建 secret 替换 dashboard 原有的 secret
     shell: |
       kubectl create secret generic kubernetes-dashboard-certs \
-      --from-file=/opt/apps/kubernetes/ssl/server.pem --from-file=/opt/apps/kubernetes/ssl/server-key.pem -n {{ dashboard_namespace }};
+      --from-file={{ install_dir }}/kubernetes/ssl/server.pem --from-file={{ install_dir }}/kubernetes/ssl/server-key.pem -n {{ dashboard_namespace }};
     when: check_dashboard_certs_result.rc != 0
 
   - name: 检查 dashboard 管理用户是否存在

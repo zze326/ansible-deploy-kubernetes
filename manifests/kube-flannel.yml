@@ -217,7 +217,7 @@ spec:
           path: /run/flannel
       - name: cni
         hostPath:
-          path: /opt/apps/cni/conf
+          path: {{ install_dir }}/cni/conf
       - name: flannel-cfg
         configMap:
           name: kube-flannel-cfg

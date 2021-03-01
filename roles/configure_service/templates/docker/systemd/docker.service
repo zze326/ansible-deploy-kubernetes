@@ -6,9 +6,9 @@ Wants=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/opt/apps/docker/bin/dockerd \
-  --config-file /opt/apps/docker/conf/daemon.json \
-  --data-root /opt/apps/docker/data
+ExecStart={{ install_dir }}/docker/bin/dockerd \
+  --config-file {{ install_dir }}/docker/conf/daemon.json \
+  --data-root {{ install_dir }}/docker/data
 ExecReload=/bin/kill -s HUP $MAINPID
 TimeoutSec=0
 RestartSec=2

@@ -1,7 +1,7 @@
 - name: 渲染 Docker 配置文件
   template:
     src: docker/conf/daemon.json
-    dest: /opt/apps/docker/conf/daemon.json
+    dest: '{{ install_dir }}/docker/conf/daemon.json'
 
 - name: 渲染 Docker Service unit 文件
   template:
