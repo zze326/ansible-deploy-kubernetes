@@ -9,6 +9,8 @@
 - [x] 多 Master 高可用（Keepalived + Nginx）一键部署；
 - [x] 透明支持 CentOS 7 和 Ubuntu 16/18；
 - [x] 多版本兼容（已通过测试的版本有：`v1.17.x`、`v1.18.x`、`v1.19.x`）；
+- [x] 支持自定义 Service 和 Pod 网段；
+- [x] 支持 HAProxy Ingress Controller 和 Nginx Ingress Controller 可选部署；
 
 > 如有疑惑或建议可提 ISSUE 或在 [此链接](https://www.zze.xyz/archives/kubernetes-deploy-binary-mutil-master.html) 下留言。
 >
@@ -118,6 +120,10 @@ all:
     virtual_ip: 10.0.1.200
     # Keepalived VIP 绑定的网卡，如果多个主机网卡名不同，则可定义在对应的主机变量下
     virtual_ip_device: eth0
+    # Service 网络网段，默认为 10.0.0.0/24
+    service_net: 10.0.0.0/24
+    # Pod 网络网段，默认为 10.244.0.0/16
+    pod_net: 10.244.0.0/16
     # 多主架构时 Nginx 代理 APIServer 使用的端口，如果代理和 APIServer 在同一台主机，则不可为 6443，因为 APIServer 的默认端口为 6443
     proxy_master_port: 7443
     # 应用的安装目录，kube-apiserver、kube-controller-manager、kube-scheduler、kubelet、kube-proxy、nginx、cni、docker、keepalived 等这些应用程序的安装目录
@@ -154,8 +160,8 @@ all:
     dashboard_port: 30001
     # 保存 Dashboard 访问 Token 的文件名，在当前 hosts.yml 同级目录下
     dashboard_token_file: dashboard_token.txt
-    # 启用 Ingress，可使用在 hosts 节对应主机下添加 ingress: yes 标识仅在该主机上部署 Ingress-Controller，如果没有标识则默认在所有 Node 上部署
-    enable_ingress: yes
+    # 选择 Ingress Controller 的类型，目前可选 nginx 和 haproxy，可使用在 hosts 节对应主机下添加 ingress: yes 标识仅在该主机上部署 Ingress-Controller，如果没有标识则默认在所有 Node 上部署
+    ingress_controller_type: nginx
   # 下面为主机清单配置，只不过是 YAML 格式，每一个 IP 代表一个主机，其下级字段为对应的主机变量，即如下配置有三个主机
   hosts:
     10.0.1.201:
