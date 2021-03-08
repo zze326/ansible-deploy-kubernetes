@@ -36,6 +36,13 @@
     cfssl_json_bin: '/usr/local/bin/cfssl-json'
     dashboard_namespace: kubernetes-dashboard
     exec_user: '{{ user_result.stdout }}'
+    service_net: '{% if service_net is defined %}{{ service_net }}{% else %}10.0.0.0/24{% endif %}'
+    pod_net: '{% if pod_net is defined %}{{ pod_net }}{% else %}10.244.0.0/16{% endif %}'
+
+- name: test
+  debug:
+    msg: '{{ service_net }} -- {{ pod_net }}'
+
 
 - name: 检查 Master 节点 (1/8)
   fail:

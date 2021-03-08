@@ -1,7 +1,7 @@
 {
     "CN": "kubernetes",
     "hosts": [
-      "10.0.0.1",
+      "{{ service_net.rsplit(".",1)[0] }}.1",
       "127.0.0.1",
       "kubernetes",
       "kubernetes.default",

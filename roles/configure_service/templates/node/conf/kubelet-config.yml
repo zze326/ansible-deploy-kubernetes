@@ -5,7 +5,7 @@ port: 10250
 readOnlyPort: 10255
 cgroupDriver: cgroupfs
 clusterDNS:
-- 10.0.0.2
+- {{ service_net.rsplit(".",1)[0] }}.2
 clusterDomain: cluster.local
 failSwapOn: false
 authentication:

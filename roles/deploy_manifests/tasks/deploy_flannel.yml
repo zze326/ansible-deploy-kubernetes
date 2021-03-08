@@ -17,12 +17,12 @@
       table: nat
       chain: POSTROUTING
       action: append
-      source: '10.0.0.1/32'
+      source: '{{ service_net.rsplit(".",1)[0] }}.1/32'
       jump: MASQUERADE
 
   - name: 持久化 iptables 规则
     lineinfile:
-      line: iptables -t nat -A POSTROUTING -s 10.0.0.1/32 -j MASQUERADE
+      line: iptables -t nat -A POSTROUTING -s {{ service_net.rsplit(".",1)[0] }}.1/32 -j MASQUERADE
       dest: '/etc{% if ansible_distribution == "CentOS" %}/rc.d{% endif %}/rc.local'
       mode: '0755'
   when: node is defined and node
