@@ -3,7 +3,7 @@
   changed_when: no
   run_once: yes
   connection: local
-  shell: 'ls {{ manifests_dir }}/*ingress-controller*.yml {{ manifests_dir }}/*ingress-controller*.yaml'
+  shell: 'ls {{ manifests_dir }}/{{ ingress_controller_type }}*ingress-controller*.yml {{ manifests_dir }}/{{ ingress_controller_type }}*ingress-controller*.yaml'
   register: check_ingress_result
 
 - name: 设置变量

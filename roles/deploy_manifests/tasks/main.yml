@@ -41,7 +41,7 @@
   - deploy_coredns
 
 - import_tasks: deploy_ingress.yml
-  when: enable_ingress is defined and enable_ingress
+  when: ingress_controller_type is defined
   tags:
   - deploy_ingress
 
