@@ -48,6 +48,10 @@
   changed_when: no
   shell: . /etc/rc.local
 
+- name: 设置时区为亚洲上海
+  timezone: 
+    name: Asia/Shanghai
+
 - name: 时间同步
   cron:
     name: sync network time

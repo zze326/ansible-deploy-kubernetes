@@ -1,0 +1,40 @@
+- name: 检查是否存在 calico manifests - manifests/calico-etcd.yml
+  failed_when: no
+  changed_when: no
+  run_once: yes
+  connection: local
+  shell: 'ls {{ manifests_dir }}/*calico*.yml {{ manifests_dir }}/*calico*.yaml'
+  register: check_calico_result
+
+- name: 获取 etcd 私钥、证书、CA 证书以 base64 加密的结果
+  changed_when: no
+  run_once: yes
+  connection: local
+  shell: |
+    cat {{ tls_dir }}/etcd/server-key.pem | base64 -w 0
+    echo
+    cat {{ tls_dir }}/etcd/server.pem | base64 -w 0
+    echo
+    cat {{ tls_dir }}/etcd/ca.pem | base64 -w 0
+  register: etcd_cert_result
+
+- name: 设置变量
+  run_once: yes
+  set_fact:
+    calico_manifests_list: '{{ check_calico_result.stdout_lines }}'
+    etcd_key: '{{ etcd_cert_result.stdout_lines[0] }}'
+    etcd_cert: '{{ etcd_cert_result.stdout_lines[1] }}'
+    etcd_ca: '{{ etcd_cert_result.stdout_lines[2] }}'
+  
+- block:
+  - name: 分发 calico manifests 到 master 节点
+    template:
+      src: '{{ item }}'
+      dest: /tmp/
+    with_items: '{{ calico_manifests_list }}'
+
+  - name: 部署 calico
+    shell: kubectl apply -f /tmp/{{ item | basename }}
+    with_items: '{{ calico_manifests_list }}'
+  when: calico_manifests_list and ansible_host == master_list[0]
+

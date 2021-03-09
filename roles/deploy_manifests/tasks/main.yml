@@ -33,8 +33,14 @@
   - deploy_dashboard
 
 - import_tasks: deploy_flannel.yml
+  when: cni_type is defined and cni_type == 'flannel'
   tags:
   - deploy_flannel
+
+- import_tasks: deploy_calico.yml
+  when: cni_type is defined and cni_type == 'calico'
+  tags:
+  - deploy_calico
 
 - import_tasks: deploy_coredns.yml
   tags:

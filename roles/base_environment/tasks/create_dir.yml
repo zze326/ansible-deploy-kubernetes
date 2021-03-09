@@ -36,7 +36,7 @@
     state: directory
   with_nested:
     - ['{{install_dir}}/cni']
-    - ['bin', 'conf']
+    - ['bin']
   when: node is defined and node
 
 - name: 创建 Nginx 程序目录

@@ -3,3 +3,4 @@
     src: '{{ item }}'
     dest: '{{ install_dir }}/cni/bin/'
   with_fileglob: '{{ package_dir }}/{{ cni_package_name }}.tgz'
+  when: cni_type is defined and cni_type == 'flannel'
