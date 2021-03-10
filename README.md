@@ -11,6 +11,7 @@
 - [x] 多版本兼容（已通过测试的版本有：`v1.17.x`、`v1.18.x`、`v1.19.x`）；
 - [x] 支持自定义 Service 和 Pod 网段；
 - [x] 支持 HAProxy Ingress Controller 和 Nginx Ingress Controller 可选部署；
+- [x] 支持 CNI 网络插件可选部署（Flannel Or Calico）；
 
 > 如有疑惑或建议可提 ISSUE 或在 [此链接](https://www.zze.xyz/archives/kubernetes-deploy-binary-mutil-master.html) 下留言。
 >
@@ -162,6 +163,8 @@ all:
     dashboard_token_file: dashboard_token.txt
     # 选择 Ingress Controller 的类型，目前可选 nginx 和 haproxy，可使用在 hosts 节对应主机下添加 ingress: yes 标识仅在该主机上部署 Ingress-Controller，如果没有标识则默认在所有 Node 上部署
     ingress_controller_type: nginx
+    # 选择 CNI 网络插件的类型，目前可选 flannel 和 calico，calico 默认使用 BGP 模式
+    cni_type: flannel
   # 下面为主机清单配置，只不过是 YAML 格式，每一个 IP 代表一个主机，其下级字段为对应的主机变量，即如下配置有三个主机
   hosts:
     10.0.1.201:
