@@ -39,10 +39,31 @@
     service_net: '{% if service_net is defined %}{{ service_net }}{% else %}10.0.0.0/24{% endif %}'
     pod_net: '{% if pod_net is defined %}{{ pod_net }}{% else %}10.244.0.0/16{% endif %}'
 
-- name: test
-  debug:
-    msg: '{{ service_net }} -- {{ pod_net }}'
+- name: 检查安装包目录({{ package_dir }})是否存在 (1/2)
+  run_once: yes
+  failed_when: no
+  connection: local
+  shell: '[ -d {{ package_dir }} ]'
+  register: package_dir_exists
 
+- name: 检查安装包目录({{ package_dir }})是否存在 (2/2)
+  run_once: yes
+  connection: local
+  fail: 
+    msg: 'package_dir: {{ package_dir }} 不存在'
+  when: package_dir_exists.rc != 0
+
+- name: 检查 ingress_controller_type 类型是否合法
+  run_once: yes
+  fail: 
+    msg: 'ingress_controller_type 只能为 haproxy 或 nginx，你设置的：{{ingress_controller_type}}'
+  when: ingress_controller_type is defined and ingress_controller_type not in ['haproxy','nginx']
+
+- name: 检查 cni_type 类型是否合法
+  run_once: yes
+  fail: 
+    msg: 'cni_type 只能为 flannel 或 calico，你设置的：{{cni_type}}'
+  when: cni_type is defined and cni_type not in ['flannel','calico']
 
 - name: 检查 Master 节点 (1/8)
   fail:
