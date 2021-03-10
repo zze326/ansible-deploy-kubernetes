@@ -161,9 +161,9 @@ all:
     dashboard_port: 30001
     # 保存 Dashboard 访问 Token 的文件名，在当前 hosts.yml 同级目录下
     dashboard_token_file: dashboard_token.txt
-    # 选择 Ingress Controller 的类型，目前可选 nginx 和 haproxy，可使用在 hosts 节对应主机下添加 ingress: yes 标识仅在该主机上部署 Ingress-Controller，如果没有标识则默认在所有 Node 上部署
+    # 选择 Ingress Controller 的类型，目前可选 nginx 和 haproxy，可使用在 hosts 节对应主机下添加 ingress: yes 标识仅在该主机上部署 Ingress-Controller，如果没有标识则默认在所有 Node 上部署，注释此变量则不会部署 Ingress Controller
     ingress_controller_type: nginx
-    # 选择 CNI 网络插件的类型，目前可选 flannel 和 calico，calico 默认使用 BGP 模式
+    # 选择 CNI 网络插件的类型，目前可选 flannel 和 calico，calico 默认使用 BGP 模式，注释此变量则不会部署 CNI 网络插件
     cni_type: flannel
   # 下面为主机清单配置，只不过是 YAML 格式，每一个 IP 代表一个主机，其下级字段为对应的主机变量，即如下配置有三个主机
   hosts:
@@ -223,6 +223,8 @@ all:
     pause_image: registry.cn-shenzhen.aliyuncs.com/zze/pause:3.2
     dashboard_port: 30001
     dashboard_token_file: dashboard_token.txt
+    ingress_controller_type: haproxy
+    cni_type: flannel
   hosts:
     10.0.1.201:
       hostname: k8s-master1
