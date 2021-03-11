@@ -46,6 +46,10 @@
   tags:
   - deploy_coredns
 
+- import_tasks: deploy_metrics_server.yml
+  tags:
+  - deploy_metrics_server
+
 - import_tasks: deploy_ingress.yml
   when: ingress_controller_type is defined
   tags:

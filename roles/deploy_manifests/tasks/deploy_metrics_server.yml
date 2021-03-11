@@ -1,0 +1,24 @@
+- name: 检查是否存在 metrics server manifests - manifests/metrics-server.yml
+  failed_when: no
+  changed_when: no
+  run_once: yes
+  connection: local
+  shell: 'ls {{ manifests_dir }}/*metrics-server*.yml {{ manifests_dir }}/*metrics-server*.yaml'
+  register: check_metrics_server_result
+
+- name: 设置变量
+  run_once: yes
+  set_fact:
+    metrics_server_manifests_list: '{{ check_metrics_server_result.stdout_lines }}'
+
+- block:
+  - name: 分发 metrics server manifests 到 master 节点
+    template:
+      src: '{{ item }}'
+      dest: /tmp/
+    with_items: '{{ metrics_server_manifests_list }}'
+
+  - name: 部署 metrics server
+    shell: kubectl apply -f /tmp/{{ item | basename }}
+    with_items: '{{ metrics_server_manifests_list }}'
+  when: metrics_server_manifests_list and ansible_host == master_list[0]
