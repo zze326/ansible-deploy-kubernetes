@@ -3,6 +3,7 @@
 
 - [x] CNI 插件自动部署；
 - [x] Dashboard UI 自动部署；
+- [x] Metrics Server 自动部署；
 - [x] core DNS 自动部署；
 - [x] 一键加入新的 Node；
 - [x] Ingress-Controller 自动部署；
@@ -13,10 +14,12 @@
 - [x] 支持 HAProxy Ingress Controller 和 Nginx Ingress Controller 可选部署；
 - [x] 支持 CNI 网络插件可选部署（Flannel Or Calico）；
 
+
 > 如有疑惑或建议可提 ISSUE 或在 [此链接](https://www.zze.xyz/archives/kubernetes-deploy-binary-mutil-master.html) 下留言。
 >
 > 这里我在 CentOS 7.8 和 Ubuntu 16.04 上进行了测试，完全能够一键跑完。
 >
+> 用的顺手可以点一下右上角 Star 哦~~
 > 要注意的是，如果你使用的是 Ubuntu，那么需要先在所有节点上装上 python 环境，因为 Ansible 依赖被控端的 python，而 Ubuntu 默认是没有的（CentOS 默认有），执行 `sudo apt install python-minimal` 安装即可。
 
 ## 环境准备
@@ -390,101 +393,3 @@ round-trip min/avg/max = 1.334/1.334/1.334 ms
 / # ping 10.244.1.3
 PING 10.244.1.3 (10.244.1.3): 56 data bytes
 64 bytes from 10.244.1.3: seq=0 ttl=62 time=0.761 ms
-64 bytes from 10.244.1.3: seq=1 ttl=62 time=0.467 ms
-^C
---- 10.244.1.3 ping statistics ---
-2 packets transmitted, 2 packets received, 0% packet loss
-round-trip min/avg/max = 0.467/0.614/0.761 ms
-```
-可以看到是可以正常通信的。
-
-### 检查 Core DNS
-依旧时进入上述测试进入的 `Pod`，测试解析 `kubernetes` 为 IP：
-
-```bash
-$ kubectl exec -it test-54fdd84b68-j9zwq -- sh
-/ # nslookup kubernetes
-Server:    10.0.0.2
-Address 1: 10.0.0.2 kube-dns.kube-system.svc.cluster.local
-
-Name:      kubernetes
-Address 1: 10.0.0.1 kubernetes.default.svc.cluster.local
-```
-解析成功，说明 Core DNS 也工作正常。
-
-### 检查 Dashboard UI
-
-这里我将 Dashboard 服务默认使用 `NodePort` 类型的 `Service` 暴露服务，其暴露端口由 `hosts.yml` 中的 `dashboard_port` 指定，这里我指定的为 `30001`，所以 Dashboard UI 的访问地址为 [https://NodeIP:30001](https://10.0.1.203:30001)。
-
-并且在上述 Ansible Role 执行完成之后会在 `hosts.yml` 同级目录下生成一个 `dashboard_token.txt` 文件，该文件名由 `hosts.yml` 中的 `dashboard_token_file` 指定，该文件中保存了具备访问 Dashboard UI 权限的用户的 Token，如下：
-
-```bash
-$ ls
-dashboard_token.txt  hosts.yml  manifests  README.md  roles  run.yml
-$ cat dashboard_token.txt 
-eyJhbGciOiJSUzI1NiIsImtpZCI6IlhjQU9EckdpRHpSNTZTQXoyMjJHa3lRWVd4UGw2ZGhhNjk0RkhUZlBKWkUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkYXNoYm9hcmQtYWRtaW4tdG9rZW4tOTc2NTYiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGFzaGJvYXJkLWFkbWluIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiN2ZjNzE3YzctYjk5MS00NjFiLWE5MGUtNTkyYjQ0Njc3MzM4Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmUtc3lzdGVtOmRhc2hib2FyZC1hZG1pbiJ9.PgNaPBkI28hv2jmFF5z5DKSI2Rl_0PNHxAQn9-t-033Lr7aIW7NL8QE_1Nj4fAJ692VY85bEFiHXAsStyxusMeN6LvJTRGbcZaWZN0YbqX5Q6n22VE0goadGStfVmuSGkB-fyDe5WACTFJPN9EdXbgXtkD4Ny5CX4Kzv3S9iigs_58UBRhwkBs2BVuE_5PT361KK82HP6yvS-YYGRqTHEvRyk4AQ2L4Dh7NSYH8pFba-n5nT4K8wOlbqdkdQN62S5KkabYOEzHBX8WoHTERr36YxhpMvhk3o0iWgkGiOaxEfjwamtz5SDb3NQvRGqNXwNsTRh48Xw8hDfYRf7s6d-g
-```
-
- 进入 Dashboard UI 页面后选择 Token 认证直接填入该 Token 就可以登入。
-
-### 检查 Ingress
-
-当前默认使用的是 HAProxy Ingress-Controller，检查是否部署成功：
-
-```bash
-$ kubectl get pod -n haproxy-controller -o wide
-NAME                                     READY   STATUS    RESTARTS   AGE   IP           NODE        NOMINATED NODE   READINESS GATES
-haproxy-ingress-jtldj                    1/1     Running   0          10m   10.0.1.203   k8s-node1   <none>           <none>
-ingress-default-backend-c675c85f-6k974   1/1     Running   0          30m   10.244.2.6   k8s-node1   <none>           <none>
-```
-
-由于上面我在 `k8s-node1` 节点下添加了 `ingress: yes` 属性，所以仅会在该节点下部署 Ingress-Controller。
-
-这里先使用 Nginx 镜像创建一个 `Deployment` 资源，然后使用 `Service` 资源暴露它到集群内部：
-
-```bash
-$ kubectl create deploy nginx-web --image=nginx
-deployment.apps/nginx-web created
-$ kubectl expose deploy nginx-web --target-port=80 --port=80
-service/nginx-web exposed
-```
-
-下面添加一下 `Ingress` 规则来检查 Ingress-Controller 是否运作正常，定义如下 `Ingress` 规则：
-
-```bash
-$ cat web-ingress.yml 
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: test-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-spec:
-  rules:
-  - host: "www.zze.cn"
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx-web
-            port:
-              number: 80
-```
-
-修改本机的 hosts 进行测试，解析 `www.zze.cn` 到部署了 Ingress-Controller 的节点，访问结果如下：
-
-```bash
-$ curl -I www.zze.cn
-HTTP/1.1 200 OK
-server: nginx/1.19.3
-date: Wed, 28 Oct 2020 07:58:13 GMT
-content-type: text/html
-content-length: 612
-last-modified: Tue, 29 Sep 2020 14:12:31 GMT
-etag: "5f7340cf-264"
-accept-ranges: bytes
-```
-
-OK，Ingress-Controller  也工作正常~
