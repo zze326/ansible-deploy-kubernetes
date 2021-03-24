@@ -1,0 +1,28 @@
+[plugins.opt]
+path = "{{ install_dir }}/containerd"
+[plugins.cri]
+stream_server_address = "127.0.0.1"
+stream_server_port = "10010"
+sandbox_image = "{{ pause_image }}"
+max_concurrent_downloads = 20
+  [plugins.cri.containerd]
+    snapshotter = "overlayfs"
+    [plugins.cri.containerd.default_runtime]
+      runtime_type = "io.containerd.runtime.v1.linux"
+      runtime_engine = ""
+      runtime_root = ""
+    [plugins.cri.containerd.untrusted_workload_runtime]
+      runtime_type = ""
+      runtime_engine = ""
+      runtime_root = ""
+  [plugins.cri.cni]
+    bin_dir = "{{ install_dir }}/cni/bin"
+    conf_dir = "/etc/cni/net.d"
+[plugins."io.containerd.runtime.v1.linux"]
+  shim = "containerd-shim"
+  runtime = "runc"
+  runtime_root = ""
+  no_shim = false
+  shim_debug = false
+[plugins."io.containerd.runtime.v2.task"]
+  platforms = ["linux/amd64"]

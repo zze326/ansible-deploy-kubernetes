@@ -1,0 +1,28 @@
+[Unit]
+Description=Lightweight Kubernetes
+Documentation=https://containerd.io
+After=network-online.target
+
+[Service]
+ExecStartPre=-/sbin/modprobe br_netfilter
+ExecStartPre=-/sbin/modprobe overlay
+ExecStartPre=-/bin/mkdir -p {{ install_dir }}/containerd/run
+ExecStart={{ install_dir }}/containerd/bin/containerd \
+         -c {{ install_dir }}/containerd/conf/config.toml \
+         -a {{ install_dir }}/containerd/run/containerd.sock \
+         --state {{ install_dir }}/containerd/run/containerd \
+         --root {{ install_dir }}/containerd/data
+
+KillMode=process
+Delegate=yes
+OOMScoreAdjust=-999
+LimitNOFILE=1024000
+LimitNPROC=1024000
+LimitCORE=infinity
+TasksMax=infinity
+TimeoutStartSec=0
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

@@ -1,3 +1,52 @@
+- set_fact:
+    etcd_package_name: etcd-v*-linux-amd64
+    kubernetes_package_name: kubernetes
+    container_runtime_package_name: '{{ container_runtime }}*'
+    docker_package_name: docker*
+    cni_package_name: cni-plugins-linux-amd64-*
+
+- name: 检查容器运行时
+  run_once: yes
+  fail: 
+    msg: '目前 container_runtime 只支持 docker 和 containerd'
+  when: container_runtime not in ['docker','containerd']
+
+- name: 获取 Kubernetes 版本号 - 解压 Kubernetes 安装包到本机 /tmp 目录 (1/4)
+  run_once: yes
+  connection: local
+  unarchive:
+    src: '{{ item }}'
+    dest: /tmp
+  with_fileglob: '{{ package_dir }}/kubernetes-server-*.tar.gz'
+
+- name: 获取 Kubernetes 版本号 - 设置临时变量保存 Kubernetes 安装包本地解压路径 (2/4)
+  run_once: yes
+  set_fact:
+    kubernetes_bin_tmp_path: /tmp/{{ kubernetes_package_name }}/server/bin
+
+- name: 获取 Kubernetes 版本号 (3/4)
+  connection: local
+  run_once: yes
+  shell: '{{ kubernetes_bin_tmp_path }}/kubectl version -o json'
+  register: k8s_version_result
+
+- name: 获取 Kubernetes 版本号 - 设置变量 (4/4)
+  run_once: yes
+  set_fact:
+    major_version: '{{ (k8s_version_result.stdout | from_json).serverVersion.major }}'
+    minor_version: '{{ (k8s_version_result.stdout | from_json).serverVersion.minor }}'
+
+- name: 当前集群版本信息
+  run_once: yes
+  debug:
+    msg: '主版本：{{ major_version }}，子版本：{{ minor_version }}'
+
+- name: 检查容器运行时
+  run_once: yes
+  fail: 
+    msg: '不建议在 1.20+ 以上的 Kubernetes 集群继续使用 Docker 运行时'
+  when: (minor_version | int >= 20) and container_runtime == 'docker'
+
 - name: 初始化配置 (1/1)
   fail:
     msg: 'is_mutil_master 必须定义，为 yes 表示多 master，no 表示单 master'
@@ -14,7 +63,7 @@
     ingress_list_str: '{% for host in groups["all"] %}{% if "ingress" in hostvars[host] and hostvars[host].ingress %}{{ hostvars[host].hostname }},{% endif %}{% endfor %}'
     max_proxy_priority: '{% set max = 0 %}{% for host in groups["all"] %}{% if "proxy_priority" in hostvars[host] %}{% if hostvars[host].proxy_priority > max %}{% set max = hostvars[host].proxy_priority%}{% if loop.last %}{{ max }}{% endif %}{% endif %}{% endif %}{% endfor %}'
 
-- name: 获取当前执行 ansible-playbook 的用户名
+- name: 获取当前执行 ansible-playbook 的用户名 (1/1)
   run_once: yes
   connection: local
   shell: whoami
@@ -38,6 +87,7 @@
     exec_user: '{{ user_result.stdout }}'
     service_net: '{% if service_net is defined %}{{ service_net }}{% else %}10.0.0.0/24{% endif %}'
     pod_net: '{% if pod_net is defined %}{{ pod_net }}{% else %}10.244.0.0/16{% endif %}'
+    container_runtime: '{% if container_runtime is defined and (major_version | int <= 1 and minor_version | int < 20) %}{{ container_runtime }}{% else %}containerd{% endif %}'
 
 - name: 检查安装包目录({{ package_dir }})是否存在 (1/2)
   run_once: yes

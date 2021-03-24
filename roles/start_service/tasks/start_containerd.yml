@@ -1,0 +1,6 @@
+- name: 启动 Containerd 服务
+  systemd:
+    name: containerd
+    state: started
+    enabled: yes
+    daemon_reload: yes

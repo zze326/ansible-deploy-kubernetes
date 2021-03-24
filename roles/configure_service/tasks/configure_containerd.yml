@@ -1,0 +1,15 @@
+# 此配置文件可通过 containerd config default 生成
+- name: 渲染 Containerd 配置文件
+  template:
+    src: containerd/conf/config.toml
+    dest: '{{ install_dir }}/containerd/conf/config.toml'
+
+- name: 渲染 crictl 客户端配置文件
+  template: 
+    src: containerd/conf/crictl.yaml
+    dest: /etc/crictl.yaml
+
+- name: 渲染 Containerd Service unit 文件
+  template:
+    src: containerd/systemd/containerd.service
+    dest: '{% if ansible_distribution == "CentOS" %}/usr{% endif %}/lib/systemd/system/containerd.service'

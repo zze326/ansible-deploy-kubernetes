@@ -3,17 +3,26 @@
   tags:
   - start_etcd
 
-- import_tasks: start_docker.yml
-  when: (node is defined and node) or (is_mutil_master and proxy_master is defined and proxy_master)
+- block:
+  - import_tasks: start_docker.yml
+    when: container_runtime == 'docker'
+
+  - import_tasks: start_containerd.yml
+    when: container_runtime == 'containerd'
+
+  when: node is defined and node
   tags:
-  - start_docker
+  - start_container_runtime
 
 - import_tasks: start_master.yml
   when: master is defined and master
   tags:
   - start_master
 
-- import_tasks: start_master_proxy.yml
+- block:
+  - import_tasks: start_docker.yml
+  
+  - import_tasks: start_master_proxy.yml
   when: is_mutil_master and proxy_master is defined and proxy_master
   tags:
   - start_master_proxy

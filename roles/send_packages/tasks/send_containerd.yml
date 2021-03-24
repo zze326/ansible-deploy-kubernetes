@@ -1,0 +1,45 @@
+- name: 检查是否 containerd 二进制包是否已存在
+  ignore_errors: yes
+  shell: 'cd {{ install_dir }}/containerd/bin && [ -f containerd ] && [ -f containerd-shim ] && [ -f ctr ] && [ -f crictl ]'
+  changed_when: no
+  failed_when: no
+  register: check_result
+- block:
+  - name: 设置变量
+    run_once: yes
+    set_fact:
+      containerd_package_tmp_dir: /tmp/{{ container_runtime_package_name }}
+  
+  - name: 创建临时解压目录
+    file: 
+      path: '{{ containerd_package_tmp_dir }}'
+      state: directory
+
+  - name: 解压 containerd 安装包
+    unarchive:
+      src: '{{ item }}'
+      dest: '{{ containerd_package_tmp_dir }}'
+    with_fileglob: '{{ package_dir }}/{{ container_runtime_package_name }}.gz'
+
+  - name: 解压 crictl 安装包
+    unarchive:
+      src: '{{ item }}'
+      dest: '{{ install_dir }}/containerd/bin'
+    with_fileglob: '{{ package_dir }}/crictl*.gz'
+
+  - name: 移动可执行文件
+    shell: mv {{ containerd_package_tmp_dir }}/bin/* {{ install_dir }}/containerd/bin
+  when: check_result.rc != 0
+
+- name: 为 containerd 二进制文件创建软链接到 PATH 下 - 获取二进制文件路径列表 (1/2)
+  shell: find {{ install_dir }}/containerd/bin/ -type f
+  changed_when: no
+  register: containerd_bin_list
+
+- name: 为 containerd 二进制文件创建软链接到 PATH 下 - 创建软链接 (2/2)
+  file:
+    src: '{{ item }}'
+    dest: /usr/local/bin/{{ item|basename }}
+    mode: '0755'
+    state: link
+  with_items: '{{ containerd_bin_list.stdout_lines }}'

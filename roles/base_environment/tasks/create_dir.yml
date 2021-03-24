@@ -21,13 +21,24 @@
     - ['bin', 'data', 'conf', 'ssl']
   when: etcd is defined and etcd
 
-- name: 创建 Docker 程序目录
-  file:
-    path: '{{ item.0 }}/{{ item.1 }}'
-    state: directory
-  with_nested:
-    - ['{{install_dir}}/docker']
-    - ['bin', 'data', 'conf']
+- block:
+  - name: 创建 Docker 程序目录
+    file:
+      path: '{{ item.0 }}/{{ item.1 }}'
+      state: directory
+    with_nested:
+      - ['{{install_dir}}/docker']
+      - ['bin', 'data', 'conf']
+    when: container_runtime == 'docker' or (proxy_master is defined and proxy_master)
+
+  - name: 创建 Containerd 程序目录
+    file:
+      path: '{{ item.0 }}/{{ item.1 }}'
+      state: directory
+    with_nested:
+      - ['{{install_dir}}/containerd']
+      - ['bin', 'data', 'conf', 'run']
+    when: container_runtime == 'containerd' and (node is defined and node)
   when: (node is defined and node) or (proxy_master is defined and proxy_master)
 
 - name: 创建 CNI 插件安装目录
