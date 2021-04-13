@@ -8,7 +8,7 @@
   - name: 设置变量
     run_once: yes
     set_fact:
-      containerd_package_tmp_dir: /tmp/{{ container_runtime_package_name }}
+      containerd_package_tmp_dir: /tmp/{{ container_runtime }}
   
   - name: 创建临时解压目录
     file: 
