@@ -41,11 +41,11 @@
   debug:
     msg: '主版本：{{ major_version }}，子版本：{{ minor_version }}'
 
-- name: 检查容器运行时
-  run_once: yes
-  fail: 
-    msg: '不建议在 1.20+ 以上的 Kubernetes 集群继续使用 Docker 运行时'
-  when: (minor_version | int >= 20) and container_runtime == 'docker'
+#- name: 检查容器运行时
+#  run_once: yes
+#  fail: 
+#    msg: '不建议在 1.20+ 以上的 Kubernetes 集群继续使用 Docker 运行时'
+#  when: (minor_version | int >= 20) and container_runtime == 'docker'
 
 - name: 初始化配置 (1/1)
   fail:
@@ -87,7 +87,7 @@
     exec_user: '{{ user_result.stdout }}'
     service_net: '{% if service_net is defined %}{{ service_net }}{% else %}10.0.0.0/24{% endif %}'
     pod_net: '{% if pod_net is defined %}{{ pod_net }}{% else %}10.244.0.0/16{% endif %}'
-    container_runtime: '{% if container_runtime is defined and (major_version | int <= 1 and minor_version | int < 20) %}{{ container_runtime }}{% else %}containerd{% endif %}'
+#    container_runtime: '{% if container_runtime is defined and (major_version | int <= 1 and minor_version | int < 20) %}{{ container_runtime }}{% else %}containerd{% endif %}'
 
 - name: 检查安装包目录({{ package_dir }})是否存在 (1/2)
   run_once: yes

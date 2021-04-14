@@ -2,7 +2,7 @@
   failed_when: no
   changed_when: no
   shell: |
-    until curl -s -I 127.0.0.1:8080 &> /dev/null;do
+    until kubectl get ns &> /dev/null;do
       sleep 5;
     done
     kubectl get clusterrolebinding | awk '{print $1}' | grep kubelet-bootstrap

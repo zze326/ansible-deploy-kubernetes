@@ -9,3 +9,15 @@
     src: '{{ item }}'
     dest: '{% if ansible_distribution == "CentOS" %}/usr{% endif %}/lib/systemd/system/'
   with_fileglob: 'templates/node/systemd/*'
+
+# - block:
+#   - name: 生成 kubeconfig 文件 - 渲染 shell (1/2)
+#     template:
+#       src: '{{ item }}'
+#       dest: '/tmp'
+#     with_fileglob: 'templates/node/shell/*'
+
+#   - name: 生成 kubeconfig 文件 - 执行 shell (2/2)
+#     script: '/tmp/{{ item|basename }}'
+#     with_fileglob: 'templates/node/shell/*'
+#   when: major_version | int >= 1 and minor_version | int >= 20

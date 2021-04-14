@@ -47,6 +47,9 @@
   with_fileglob: 
   - '{{ kubernetes_tls_dir }}/ca*.pem'
   - '{{ kubernetes_tls_dir }}/server*.pem'
+  - '{{ kubernetes_tls_dir }}/kube-scheduler*.pem'
+  - '{{ kubernetes_tls_dir }}/kube-controller-manager*.pem'
+  - '{{ kubernetes_tls_dir }}/admin*.pem'
   when: master is defined and master
 
 - name: 分发证书到 kubernetes 节点 - 分发到 node 节点 (2/2)
