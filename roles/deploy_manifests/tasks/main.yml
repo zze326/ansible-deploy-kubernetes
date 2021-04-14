@@ -13,6 +13,10 @@
   
   - name: 设置各节点在集群中的角色
     shell: |
+      until [ `kubectl get node -o name | wc -l` -eq {{ node_list | length }} ];do
+        sleep 5;
+      done;
+
       {%- for host in groups["all"] -%}
         {%- if "node" in hostvars[host] and hostvars[host].node -%}
           kubectl label nodes {{ hostvars[host].hostname }} node-role.kubernetes.io/{% if "master" in hostvars[host] and hostvars[host].master %}master{% else %}node{% endif %}= --overwrite;
