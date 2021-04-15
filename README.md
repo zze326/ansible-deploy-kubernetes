@@ -333,10 +333,10 @@ certificatesigningrequest.certificates.k8s.io/node-csr-jHEi1_yP3TNX80M8_4KPRxIzi
 ```bash
 $ kubectl get node
 NAME          STATUS     ROLES    AGE   VERSION
-k8s-master1   Ready      <none>   26m   v1.19.3
-k8s-master2   Ready      <none>   21m   v1.19.3
-k8s-node1     Ready      <none>   26m   v1.19.3
-k8s-node2     NotReady   <none>   22s   v1.19.3
+k8s-master1   Ready      <none>   26m   v1.20.5
+k8s-master2   Ready      <none>   21m   v1.20.5
+k8s-node1     Ready      <none>   26m   v1.20.5
+k8s-node2     NotReady   <none>   22s   v1.20.5
 ```
 
 
@@ -349,9 +349,9 @@ k8s-node2     NotReady   <none>   22s   v1.19.3
 ```bash
 $ kubectl get node
 NAME          STATUS   ROLES    AGE    VERSION
-k8s-master1   Ready    <none>   113s   v1.19.0
-k8s-master2   Ready    <none>   113s   v1.19.0
-k8s-node1     Ready    <none>   113s   v1.19.0
+k8s-master1   Ready    <none>   113s   v1.20.5
+k8s-master2   Ready    <none>   113s   v1.20.5
+k8s-node1     Ready    <none>   113s   v1.20.5
 ```
 ### 检查 CNI 网络插件
 检查网络插件是否正常，即检查 `Pod` 能否跨主机通信，创建如下 `Deployment` 资源：
