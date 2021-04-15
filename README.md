@@ -9,15 +9,17 @@
 - [x] Ingress-Controller 自动部署；
 - [x] 多 Master 高可用（Keepalived + Nginx）一键部署；
 - [x] 透明支持 CentOS 7 和 Ubuntu 16/18；
-- [x] 多版本兼容（已通过测试的版本有：`v1.17.x`、`v1.18.x`、`v1.19.x`）；
+- [x] 多版本兼容（已通过测试的版本有：`v1.17.x`、`v1.18.x`、`v1.19.x`、`v1.20.x`）；
 - [x] 支持自定义 Service 和 Pod 网段；
 - [x] 支持 HAProxy Ingress Controller 和 Nginx Ingress Controller 可选部署；
 - [x] 支持 CNI 网络插件可选部署（Flannel Or Calico）；
+- [x] 支持容器运行时可选部署（Containerd Or Docker）；
+- [x] 支持最新 Kubernetes 1.20.x 版本的一键部署；
 
 
 > 如有疑惑或建议可提 ISSUE 或在 [此链接](https://www.zze.xyz/archives/kubernetes-deploy-binary-mutil-master.html) 下留言。
 >
-> 这里我在 CentOS 7.8 和 Ubuntu 16.04 上进行了测试，完全能够一键跑完。
+> 这里我在 CentOS 7.8、Ubuntu 16.04 和 Ubuntu 18.04 上进行了测试，完全能够一键跑完。
 >
 > <font color='blue'>用的顺手可以点一下右上角 Star 哦~~</font>
 > 
@@ -35,6 +37,7 @@
 ├── kubernetes-server-linux-amd64-v1.17.13.tar.gz
 ├── kubernetes-server-linux-amd64-v1.18.10.tar.gz
 ├── kubernetes-server-linux-amd64-v1.19.3.tar.gz
+├── kubernetes-server-linux-amd64-v1.20.5.tar.gz
 └── packages
     ├── cfssl
     │   ├── cfssl-certinfo_linux-amd64
@@ -60,11 +63,13 @@ packages/
 │   ├── cfssljson_linux-amd64
 │   └── cfssl_linux-amd64
 ├── cni-plugins-linux-amd64-v0.8.7.tgz
+├── containerd-1.4.4-linux-amd64.tar.gz
+├── crictl-v1.20.0-linux-amd64.tar.gz
 ├── docker-19.03.9.tgz
 ├── etcd-v3.4.13-linux-amd64.tar.gz
-└── kubernetes-server-linux-amd64-v1.19.3.tar.gz
+└── kubernetes-server-linux-amd64-v1.20.5.tar.gz
 
-1 directory, 7 files
+1 directory, 9 files
 ```
 
 我这里将 `packages` 目录放到服务器的 `/opt` 目录下，所以最终 `packages` 目录的绝对路径为 `/opt/packages` ，这个路径要和后面 `hosts.yml` 中的 `package_dir` 变量值设置的路径对应。
@@ -169,6 +174,8 @@ all:
     ingress_controller_type: nginx
     # 选择 CNI 网络插件的类型，目前可选 flannel 和 calico，calico 默认使用 BGP 模式，注释此变量则不会部署 CNI 网络插件
     cni_type: flannel
+    # 选择 kubelet 使用的容器运行时，先支持 docker 和 containerd，kubernetes 1.20+ 后推荐使用 containerd，即便设置 containerd 为容器运行时，为方便使用依旧会在所有 node 上部署 docker
+    container_runtime: containerd
   # 下面为主机清单配置，只不过是 YAML 格式，每一个 IP 代表一个主机，其下级字段为对应的主机变量，即如下配置有三个主机
   hosts:
     10.0.1.201:
