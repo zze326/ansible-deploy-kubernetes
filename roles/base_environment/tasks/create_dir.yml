@@ -29,7 +29,7 @@
     with_nested:
       - ['{{install_dir}}/docker']
       - ['bin', 'data', 'conf']
-    when: container_runtime == 'docker' or (proxy_master is defined and proxy_master)
+    # when: container_runtime == 'docker' or (proxy_master is defined and proxy_master)
 
   - name: 创建 Containerd 程序目录
     file:

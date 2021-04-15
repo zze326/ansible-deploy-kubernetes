@@ -10,7 +10,7 @@
 
 - block:
   - import_tasks: send_docker.yml
-    when: container_runtime == 'docker' or (is_mutil_master and proxy_master is defined and proxy_master)
+    # when: container_runtime == 'docker' or (is_mutil_master and proxy_master is defined and proxy_master)
   
   - import_tasks: send_containerd.yml
     when: container_runtime == 'containerd' and (node is defined and node)

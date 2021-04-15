@@ -5,7 +5,7 @@
 
 - block:
   - import_tasks: start_docker.yml
-    when: container_runtime == 'docker'
+    # when: container_runtime == 'docker'
 
   - import_tasks: start_containerd.yml
     when: container_runtime == 'containerd'
