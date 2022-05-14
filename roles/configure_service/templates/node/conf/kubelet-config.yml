@@ -28,3 +28,6 @@ evictionHard:
   nodefs.inodesFree: 5%
 maxOpenFiles: 1000000
 maxPods: 110
+{% if minor_version | int >= 24 %}
+kubeletCgroups: /systemd/system.slice
+{% endif %}

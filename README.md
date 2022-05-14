@@ -98,6 +98,7 @@ host_key_checking = False
 ## 结构说明
 安装完成后 clone 当前 Project：
 ```bash
+# 如果网络不好可以下载 release 版本更快
 $ git clone https://github.com/zze326/kubernetes-deploy-ansible.git
 ```
 克隆完成后目录结构如下：
