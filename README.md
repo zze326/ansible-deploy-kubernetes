@@ -1,6 +1,8 @@
 # 停更提示
 此项目为个人初学 Kubernetes 时所建（那时木有什么给力的一键部署工具），因工作原因木有跟进后续 Kubernetes 的更新，所以不建议大家使用啦~
+
 近几年出现了很多好用的一键部署项目，比如 [kubeasz](https://github.com/easzlab/kubeasz)、[kubespray](https://github.com/eip-work/kuboard-spray)，二进制部署 Kubernetes 我推荐使用这俩。
+
 **此仓库已停更，就当做我 ansible 的练手笔记啦~**
 
 # Ansible 二进制部署 Kubernetes
